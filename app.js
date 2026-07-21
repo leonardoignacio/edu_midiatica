@@ -3,6 +3,7 @@ window.app = {
     useTimer: false,
     timeLimit: 30,
     timerInterval: null,
+    currentStudyTab: 1, 
     
     groups: [], 
     turn: 0, 
@@ -21,24 +22,58 @@ window.app = {
     },
 
     // ==========================================================
-    // NOVA FEATURE: MODO ESTUDAR 
+    // NOVA FEATURE: MODO ESTUDAR (COM ABAS E ACORDEON)
     // ==========================================================
     startStudyMode: () => {
-        // Transição de telas
         document.getElementById('screen-intro').classList.remove('active');
         document.getElementById('screen-estudar').classList.add('active');
+        
+        window.app.changeStudyTab(1);
+    },
 
-        // Unificar as cartas
-        const todasAsCartas = [
-            ...cartasTipo1, 
-            ...cartasTipo2, 
-            ...cartasTipo3, 
-            ...cartasTipo4, 
-            ...cartasTipo5
-        ];
+    changeStudyTab: (tipo) => {
+        window.app.currentStudyTab = tipo;
 
+        // Dicionário de estilos
+        const tabStyles = {
+            1: {
+                label: "Ed. Midiática",
+                inactive: "flex-1 min-w-[130px] sm:min-w-[140px] py-2 sm:py-3 px-2 sm:px-4 rounded-lg font-bold text-xs sm:text-sm transition-all text-center bg-slate-800 text-cyan-400 border border-cyan-800 hover:bg-cyan-900/50",
+                active: "flex-1 min-w-[130px] sm:min-w-[140px] py-2 sm:py-3 px-2 sm:px-4 rounded-lg font-bold text-xs sm:text-sm transition-all text-center bg-cyan-600 text-white border border-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.4)]"
+            },
+            2: {
+                label: "Mídia Recurso",
+                inactive: "flex-1 min-w-[130px] sm:min-w-[140px] py-2 sm:py-3 px-2 sm:px-4 rounded-lg font-bold text-xs sm:text-sm transition-all text-center bg-slate-800 text-purple-400 border border-purple-800 hover:bg-purple-900/50",
+                active: "flex-1 min-w-[130px] sm:min-w-[140px] py-2 sm:py-3 px-2 sm:px-4 rounded-lg font-bold text-xs sm:text-sm transition-all text-center bg-purple-600 text-white border border-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.4)]"
+            },
+            3: {
+                label: "Prática Docente",
+                inactive: "flex-1 min-w-[130px] sm:min-w-[140px] py-2 sm:py-3 px-2 sm:px-4 rounded-lg font-bold text-xs sm:text-sm transition-all text-center bg-slate-800 text-emerald-400 border border-emerald-800 hover:bg-emerald-900/50",
+                active: "flex-1 min-w-[130px] sm:min-w-[140px] py-2 sm:py-3 px-2 sm:px-4 rounded-lg font-bold text-xs sm:text-sm transition-all text-center bg-emerald-600 text-white border border-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.4)]"
+            },
+            4: {
+                label: "Citações do Doc.",
+                inactive: "flex-1 min-w-[130px] sm:min-w-[140px] py-2 sm:py-3 px-2 sm:px-4 rounded-lg font-bold text-xs sm:text-sm transition-all text-center bg-slate-800 text-yellow-400 border border-yellow-800 hover:bg-yellow-900/50",
+                active: "flex-1 min-w-[130px] sm:min-w-[140px] py-2 sm:py-3 px-2 sm:px-4 rounded-lg font-bold text-xs sm:text-sm transition-all text-center bg-yellow-600 text-white border border-yellow-400 shadow-[0_0_10px_rgba(234,179,8,0.4)]"
+            },
+            5: {
+                label: "Fake News",
+                inactive: "flex-1 min-w-[130px] sm:min-w-[140px] py-2 sm:py-3 px-2 sm:px-4 rounded-lg font-bold text-xs sm:text-sm transition-all text-center bg-slate-800 text-red-400 border border-red-800 hover:bg-red-900/50",
+                active: "flex-1 min-w-[130px] sm:min-w-[140px] py-2 sm:py-3 px-2 sm:px-4 rounded-lg font-bold text-xs sm:text-sm transition-all text-center bg-red-600 text-white border border-red-400 shadow-[0_0_10px_rgba(239,68,68,0.4)]"
+            }
+        };
+
+        for (let i = 1; i <= 5; i++) {
+            const btn = document.getElementById(`tab-btn-${i}`);
+            btn.textContent = tabStyles[i].label; 
+            btn.className = (i === tipo) ? tabStyles[i].active : tabStyles[i].inactive; 
+        }
+
+        const sourceArrays = { 1: cartasTipo1, 2: cartasTipo2, 3: cartasTipo3, 4: cartasTipo4, 5: cartasTipo5 };
+        const cartasParaExibir = sourceArrays[tipo];
+        
         let htmlContent = '';
-        const typeNames = {1: "Ed. Midiática", 2: "Mídia como Recurso", 3: "Prática Docente", 4: "Mergulhe Fundo (Dourada)", 5: "Fake News"};
+        const typeNames = {1: "Ed. Midiática", 2: "Mídia como Recurso", 3: "Prática Docente", 4: "Citações do Doc.", 5: "Fake News"};
         const typeColors = {
             1: "text-cyan-400 border-cyan-700 bg-cyan-950/30",
             2: "text-purple-400 border-purple-700 bg-purple-950/30",
@@ -47,47 +82,55 @@ window.app = {
             5: "text-red-400 border-red-700 bg-red-950/30"
         };
 
-        todasAsCartas.forEach((c, index) => {
-            const colorConfig = typeColors[c.tipo] || "text-slate-400 border-slate-700 bg-slate-900";
-            const typeName = typeNames[c.tipo] || `Tipo ${c.tipo}`;
-            const colorClasses = colorConfig.split(' '); // [text, border, bg]
-            
+        const colorConfig = typeColors[tipo];
+        const typeName = typeNames[tipo];
+        const colorClasses = colorConfig.split(' '); 
+
+        cartasParaExibir.forEach((c, index) => {
             let conteudo = c.cenario || c.recorte || c.fakeNews;
             let feedbackHtml = '';
 
-            // Renderiza o gabarito de acordo com o tipo
             if (c.alternativas) {
                 const correta = c.alternativas.find(a => a.correta).texto;
                 feedbackHtml = `
-                    <div class="mt-5 pt-4 border-t border-slate-700">
+                    <div class="pt-4 border-t border-slate-700">
                         <p class="text-emerald-400 font-bold text-sm mb-2"><i class="fa-solid fa-check-circle mr-1"></i> Resposta Correta: <span class="font-normal text-slate-200">${correta}</span></p>
                         <p class="text-slate-400 text-sm leading-relaxed"><strong class="text-slate-300">Base Teórica:</strong> ${c.base}</p>
                     </div>
                 `;
             } else if (c.perguntas) {
                 feedbackHtml = `
-                    <div class="mt-5 pt-4 border-t border-yellow-700/50">
+                    <div class="pt-4 border-t border-yellow-700/50">
                         <p class="text-yellow-400 font-bold text-sm mb-2"><i class="fa-solid fa-lightbulb mr-1"></i> Questão para Reflexão:</p>
                         <p class="text-yellow-100/80 text-sm leading-relaxed">${c.perguntas[0]}</p>
                     </div>
                 `;
             } else if (c.fakeNews) {
                 feedbackHtml = `
-                    <div class="mt-5 pt-4 border-t border-red-800/50">
+                    <div class="pt-4 border-t border-red-800/50">
                         <p class="text-red-400 font-bold text-sm"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Penalidade: ${c.pontos} pontos.</p>
                     </div>
                 `;
             }
 
             htmlContent += `
-                <div class="bg-slate-800 border-2 ${colorClasses[1]} rounded-xl p-5 md:p-6 shadow-lg flex flex-col hover:shadow-2xl transition-shadow">
-                    <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-3">
-                        <span class="text-xs font-black text-slate-500 uppercase tracking-widest">Carta ${index + 1}</span>
-                        <span class="text-xs font-black uppercase tracking-widest ${colorClasses[0]} px-3 py-1 ${colorClasses[2]} rounded-full border ${colorClasses[1]}">${typeName}</span>
+                <details class="group bg-slate-800 border-2 ${colorClasses[1]} rounded-xl shadow-lg hover:shadow-2xl transition-all duration-300 overflow-hidden">
+                    <summary class="p-5 md:p-6 cursor-pointer list-none [&::-webkit-details-marker]:hidden flex flex-col outline-none">
+                        <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-3">
+                            <span class="text-xs font-black text-slate-500 uppercase tracking-widest">Carta ${index + 1}</span>
+                            <span class="text-xs font-black uppercase tracking-widest ${colorClasses[0]} px-3 py-1 ${colorClasses[2]} rounded-full border ${colorClasses[1]}">${typeName}</span>
+                        </div>
+                        <div class="flex justify-between items-start gap-4">
+                            <p class="text-slate-100 text-base md:text-lg leading-relaxed text-justify flex-1 m-0">${conteudo}</p>
+                            <div class="w-8 h-8 flex items-center justify-center rounded-full bg-slate-700 text-slate-300 group-open:rotate-180 transition-transform duration-300 flex-shrink-0 mt-1 border border-slate-600">
+                                <i class="fa-solid fa-chevron-down"></i>
+                            </div>
+                        </div>
+                    </summary>
+                    <div class="px-5 md:px-6 pb-5 md:pb-6">
+                        ${feedbackHtml}
                     </div>
-                    <p class="text-slate-100 text-base md:text-lg leading-relaxed text-justify">${conteudo}</p>
-                    ${feedbackHtml}
-                </div>
+                </details>
             `;
         });
 
@@ -97,7 +140,6 @@ window.app = {
     backToMenu: () => {
         document.getElementById('screen-estudar').classList.remove('active');
         document.getElementById('screen-intro').classList.add('active');
-        // Limpa a memória do DOM da lista para não acumular
         document.getElementById('study-list').innerHTML = ''; 
     },
     // ==========================================================
@@ -305,6 +347,13 @@ window.app = {
 
     renderCardHTML: (c) => {
         let timerSquareHTML = '';
+        
+        // Lógica dinâmica para a posição da Tag de Pontos. 
+        // Se o cronômetro estiver ligado, no Desktop ela desce (top-28) para ficar abaixo do relógio.
+        const badgePontosPos = window.app.useTimer 
+            ? "absolute -top-4 right-4 md:top-28 md:-right-4" 
+            : "absolute -top-4 right-4 md:-right-4";
+
         if (c.tipo === 4) {
             timerSquareHTML = `
             <div id="timer-square" class="relative md:absolute md:-top-8 md:-right-8 w-full md:w-32 bg-slate-900 border-2 md:border-4 border-yellow-600 rounded-xl md:rounded-2xl flex flex-row md:flex-col items-center justify-between md:justify-center shadow-lg md:shadow-2xl z-20 md:transform md:rotate-3 p-3 px-5 md:p-0 md:h-32 mb-6 md:mb-0 mt-3 md:mt-0">
@@ -354,7 +403,9 @@ window.app = {
         return `
         <div class="card-base relative p-5 md:p-10 mt-6 md:mt-4">
             <div class="absolute -top-4 left-4 md:-left-4 bg-cyan-950 text-cyan-400 font-black px-3 md:px-4 py-1 md:py-2 rounded-full shadow-lg border-2 border-cyan-700 text-xs md:text-lg z-20 uppercase tracking-widest">${typeNames[c.tipo]}</div>
-            <div class="absolute -top-4 right-4 md:left-1/2 md:-translate-x-1/2 bg-slate-700 text-slate-200 font-black px-4 md:px-6 py-1 md:py-2 rounded-full shadow-lg border-2 border-slate-500 text-xs md:text-lg z-20 uppercase">${c.pontos} Pts</div>
+            
+            <!-- CAIXA DE PONTOS COM POSICIONAMENTO CONDICIONAL NO DESKTOP -->
+            <div class="${badgePontosPos} bg-slate-700 text-slate-200 font-black px-4 md:px-6 py-1 md:py-2 rounded-full shadow-lg border-2 border-slate-500 text-xs md:text-lg z-20 uppercase transition-all duration-300">${c.pontos} Pts</div>
             
             ${timerSquareHTML}
             
