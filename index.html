@@ -74,6 +74,30 @@
         </div>
     </div>
 
+    <!-- Tela de Vitória Final -->
+    <div id="screen-victory" class="screen flex flex-col items-center justify-start min-h-screen p-6 md:p-10 overflow-y-auto w-full">
+        
+        <div class="text-center mb-10 w-full victory-enter">
+            <div class="text-6xl md:text-8xl mb-4">🏆</div>
+            <h1 class="text-4xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-600 mb-2 uppercase tracking-tight">Grupo Vencedor!</h1>
+            <h2 id="winner-name" class="text-4xl md:text-6xl font-bold text-white mb-6">...</h2>
+            <div class="inline-block bg-yellow-900/30 border border-yellow-500/50 text-yellow-300 px-8 py-3 rounded-full text-3xl font-mono font-bold shadow-[0_0_20px_rgba(234,179,8,0.3)]">
+                <span id="winner-score">0 Pts</span>
+            </div>
+        </div>
+
+        <div class="w-full max-w-6xl victory-enter" style="animation-delay: 0.2s;">
+            <h3 class="text-2xl font-bold text-cyan-400 mb-6 text-center uppercase tracking-widest">Resumo da Partida</h3>
+            <div id="victory-tables" class="w-full flex flex-col gap-8">
+                <!-- Tabelas injetadas via JS -->
+            </div>
+        </div>
+
+        <button onclick="location.reload()" class="mt-12 mb-8 bg-cyan-700 hover:bg-cyan-600 text-white font-bold py-4 px-10 rounded-xl transition-all text-lg shadow-lg victory-enter" style="animation-delay: 0.4s;">
+            JOGAR NOVAMENTE
+        </button>
+    </div>
+
     <!-- Scripts de Dados -->
     <script src="data_cartas1.js"></script>
     <script src="data_cartas2.js"></script>

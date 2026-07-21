@@ -2,7 +2,8 @@ window.app = {
     groups: [], 
     turn: 0, 
     deck: [],
-    cardsStatus: [], // Rastreia as cartas reveladas (true = aberta, false = fechada)
+    cardsStatus: [],
+    currentCard: null, // Guarda a carta atual para facilitar o registro no histórico
     
     showSetup: () => {
         document.getElementById('screen-intro').classList.remove('active');
@@ -14,10 +15,11 @@ window.app = {
         const g2 = document.getElementById('g2-name').value.trim() || 'Grupo 2';
         const g3 = document.getElementById('g3-name').value.trim() || 'Grupo 3';
         
+        // Inicializa os grupos com o array de histórico vazio
         window.app.groups = [ 
-            {name: g1, score: 0}, 
-            {name: g2, score: 0}, 
-            {name: g3, score: 0} 
+            {name: g1, score: 0, history: []}, 
+            {name: g2, score: 0, history: []}, 
+            {name: g3, score: 0, history: []} 
         ];
         
         document.getElementById('screen-setup').classList.remove('active');
@@ -34,12 +36,10 @@ window.app = {
             return;
         }
 
-        // Função robusta que filtra duplicatas e sorteia cartas únicas
         const getUniqueRand = (arr, numItems) => {
             const uniqueArr = [];
             const seen = new Set();
             
-            // Passo 1: Remove qualquer carta duplicada baseada no seu texto principal
             arr.forEach(item => {
                 const identifier = item.cenario || item.recorte || item.fakeNews;
                 if (!seen.has(identifier)) {
@@ -48,17 +48,14 @@ window.app = {
                 }
             });
 
-            // Passo 2: Embaralha as cartas únicas (Algoritmo Fisher-Yates)
             for (let i = uniqueArr.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [uniqueArr[i], uniqueArr[j]] = [uniqueArr[j], uniqueArr[i]];
             }
 
-            // Passo 3: Retorna a quantidade exata de cartas solicitadas
             return uniqueArr.slice(0, numItems);
         };
         
-        // Sorteia as cartas garantindo a não repetição (5 de T1-T4 e 4 de T5)
         window.app.deck = [
             ...getUniqueRand(cartasTipo1, 5), 
             ...getUniqueRand(cartasTipo2, 5),
@@ -67,13 +64,11 @@ window.app = {
             ...getUniqueRand(cartasTipo5, 4)
         ];
 
-        // Embaralha o deck final para as posições no painel ficarem misturadas
         for (let i = window.app.deck.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [window.app.deck[i], window.app.deck[j]] = [window.app.deck[j], window.app.deck[i]];
         }
 
-        // Inicializa o status de todas as 24 cartas como "fechadas" (false)
         window.app.cardsStatus = new Array(24).fill(false);
     },
 
@@ -81,7 +76,6 @@ window.app = {
         const grid = document.getElementById('board-grid');
         grid.innerHTML = '';
         
-        // Renderiza 24 cartas numeradas no painel
         window.app.deck.forEach((card, index) => {
             const isOpened = window.app.cardsStatus[index];
             const bgPattern = `url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMiIgY3k9IjIiIHI9IjIiIGZpbGw9IiMzMzQxNTUiIGZpbGwtb3BhY2l0eT0iMC40Ii8+PC9zdmc+')`;
@@ -93,7 +87,6 @@ window.app = {
                     ${isOpened ? 'disabled' : ''}
                     class="board-card bg-slate-800 border-2 ${isOpened ? 'border-slate-800 bg-slate-900' : 'border-cyan-700 bg-gradient-to-br from-slate-700 to-slate-900 text-cyan-400 hover:text-cyan-300'} rounded-xl flex items-center justify-center text-4xl font-black shadow-lg relative overflow-hidden group">
                     
-                    <!-- Fundo texturizado imitando o verso da carta -->
                     ${!isOpened ? `<div class="absolute inset-0 opacity-30 group-hover:opacity-50 transition-opacity" style="background-image: ${bgPattern}"></div>` : ''}
                     
                     <span class="relative z-10 drop-shadow-md">${isOpened ? '✓' : (index + 1)}</span>
@@ -104,21 +97,19 @@ window.app = {
 
     openCard: (index) => {
         const card = window.app.deck[index];
-        window.app.cardsStatus[index] = true; // Marca a carta como revelada
+        window.app.currentCard = card; // Salva a carta do turno atual
+        window.app.cardsStatus[index] = true; 
         
-        // Atualiza a aparência da carta imediatamente no grid
         const btn = document.getElementById(`board-card-${index}`);
         btn.disabled = true;
         btn.innerHTML = '<span class="relative z-10 drop-shadow-md text-emerald-500">✓</span>';
         
-        // Prepara e exibe o modal
         const modalContent = document.getElementById('card-modal-content');
         modalContent.innerHTML = window.app.renderCardHTML(card);
         modalContent.className = "w-full max-w-2xl w-full modal-enter";
         
         document.getElementById('card-modal').classList.remove('hidden');
         
-        // Atualiza a contagem de cartas restantes
         const remaining = window.app.cardsStatus.filter(s => !s).length;
         document.getElementById('cards-left').textContent = remaining;
     },
@@ -147,7 +138,7 @@ window.app = {
             </div>`;
         }
         
-        const typeNames = {1: "Cultura Digital e Ed. Midiática", 2: "Mídia como Recurso vs Ed. Midiática", 3: "Prática Docente"};
+        const typeNames = {1: "Cultura Digital", 2: "Mídia como Recurso", 3: "Prática Docente"};
         return `
         <div class="card-base relative p-6">
             <div class="flex justify-between items-start mb-4">
@@ -177,6 +168,18 @@ window.app = {
         const area = document.getElementById('options-area');
         area.querySelectorAll('button').forEach(b => b.disabled = true);
         
+        // Registra a resposta no histórico do Grupo
+        const card = window.app.currentCard;
+        const typeNames = {1: "Ed. Midiática", 2: "Mídia como Recurso", 3: "Prática Docente"};
+        
+        window.app.groups[window.app.turn].history.push({
+            carta: typeNames[card.tipo] || "Problema",
+            pergunta: card.cenario,
+            pontos: isCorrect ? points : 0,
+            status: isCorrect ? '<span class="text-emerald-400 font-bold">Acertou</span>' : '<span class="text-rose-400 font-bold">Errou</span>'
+        });
+
+        // Feedback Visual
         if(isCorrect) {
             btn.classList.replace('bg-slate-800', 'bg-emerald-900');
             btn.classList.add('border-emerald-500', 'text-emerald-100');
@@ -200,21 +203,41 @@ window.app = {
     },
 
     finishTurn: (pointsToAdd = 0) => {
+        const card = window.app.currentCard;
+        
+        // Registra o histórico caso a carta seja direta (Sem alternativas)
+        if (card.tipo === 4) {
+            window.app.groups[window.app.turn].history.push({
+                carta: "Mergulhe Fundo (Dourada)",
+                pergunta: card.perguntas[0],
+                pontos: 10,
+                status: '<span class="text-yellow-400 font-bold">Debateu</span>'
+            });
+        } else if (card.tipo === 5) {
+            window.app.groups[window.app.turn].history.push({
+                carta: "Fake News",
+                pergunta: card.fakeNews,
+                pontos: -2,
+                status: '<span class="text-red-500 font-bold">Penalidade</span>'
+            });
+        }
+
         window.app.groups[window.app.turn].score += pointsToAdd;
+        window.app.currentCard = null; // Limpa a memória da carta do turno
+        
         window.app.turn = (window.app.turn + 1) % 3;
         
-        // Esconde e limpa o Modal
         document.getElementById('card-modal').classList.add('hidden');
         document.getElementById('card-modal-content').innerHTML = '';
         
         window.app.updateUI();
 
-        // Checa se o jogo acabou
+        // Verifica o Fim de Jogo
         const remaining = window.app.cardsStatus.filter(s => !s).length;
         if (remaining === 0) {
             setTimeout(() => {
-                alert("O Ciclo terminou! Verifique o grupo vencedor no Ranking lateral.");
-            }, 500);
+                window.app.showVictory();
+            }, 800);
         }
     },
 
@@ -232,6 +255,70 @@ window.app = {
                 <div class="rank-item bg-slate-800 border ${isTurn ? 'border-cyan-500 bg-slate-700 shadow-[0_0_15px_rgba(34,211,238,0.2)]' : 'border-slate-700'} p-4 rounded-xl flex justify-between items-center transition-all duration-300">
                     <span class="font-bold ${isTurn ? 'text-cyan-300' : 'text-slate-300'}">${g.name}</span>
                     <span class="bg-slate-900 px-3 py-1.5 rounded-lg font-mono text-cyan-400 font-bold border border-slate-700 text-lg">${g.score}</span>
+                </div>
+            `;
+        });
+    },
+
+    showVictory: () => {
+        document.getElementById('screen-game').classList.remove('active');
+        document.body.style.overflow = 'auto'; // Habilita rolagem para ver a tabela longa
+        
+        const victoryScreen = document.getElementById('screen-victory');
+        victoryScreen.classList.add('active');
+        
+        // Determina o Vencedor
+        const sorted = [...window.app.groups].sort((a,b) => b.score - a.score);
+        const winner = sorted[0];
+        
+        document.getElementById('winner-name').textContent = winner.name;
+        document.getElementById('winner-score').textContent = winner.score + " Pts";
+        
+        // Monta as Tabelas
+        const tablesContainer = document.getElementById('victory-tables');
+        tablesContainer.innerHTML = '';
+        
+        sorted.forEach((g, index) => {
+            const isWinner = index === 0;
+            
+            let rows = g.history.map(h => `
+                <tr class="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors">
+                    <td class="p-4 text-sm text-cyan-200 align-top">${h.carta}</td>
+                    <td class="p-4 text-sm text-slate-300 align-top">${h.pergunta}</td>
+                    <td class="p-4 text-base font-mono text-slate-100 text-center align-middle">${h.pontos > 0 ? '+'+h.pontos : h.pontos}</td>
+                    <td class="p-4 text-sm text-center align-middle">${h.status}</td>
+                </tr>
+            `).join('');
+            
+            if (g.history.length === 0) {
+                rows = `<tr><td colspan="4" class="p-6 text-center text-slate-500 italic">Nenhuma carta foi jogada por este grupo.</td></tr>`;
+            }
+
+            tablesContainer.innerHTML += `
+                <div class="bg-slate-800 border ${isWinner ? 'border-yellow-500/50 shadow-[0_0_20px_rgba(234,179,8,0.15)]' : 'border-slate-700'} rounded-2xl overflow-hidden">
+                    <div class="bg-slate-900/80 p-5 border-b ${isWinner ? 'border-yellow-500/50' : 'border-slate-700'} flex flex-col md:flex-row justify-between items-center gap-4">
+                        <h3 class="text-xl font-bold ${isWinner ? 'text-yellow-400' : 'text-slate-300'}">
+                            ${index + 1}º Lugar: ${g.name}
+                        </h3>
+                        <span class="bg-slate-950 px-4 py-2 rounded-lg font-mono text-cyan-400 font-bold border border-slate-700 text-lg">
+                            Pontuação Final: ${g.score}
+                        </span>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left border-collapse min-w-[600px]">
+                            <thead>
+                                <tr class="bg-slate-900/60 text-slate-400 text-xs uppercase tracking-wider">
+                                    <th class="p-4 font-semibold w-1/5">Tipo de Carta</th>
+                                    <th class="p-4 font-semibold w-2/5">Pergunta / Cenário Enfrentado</th>
+                                    <th class="p-4 font-semibold w-1/6 text-center">Pontos</th>
+                                    <th class="p-4 font-semibold w-1/6 text-center">Resultado</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                ${rows}
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             `;
         });
