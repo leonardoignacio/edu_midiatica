@@ -130,14 +130,10 @@ window.app = {
         
         const modalContent = document.getElementById('card-modal-content');
         modalContent.innerHTML = window.app.renderCardHTML(card);
-        modalContent.className = "w-full max-w-3xl w-full modal-enter"; // Aumentei o modal para max-w-3xl
+        modalContent.className = "w-full max-w-3xl w-full modal-enter"; 
         
         document.getElementById('card-modal').classList.remove('hidden');
         
-        // Controle Lógico de Tempo: 
-        // Golden (4) = Fixo 300s
-        // Problemas (1,2,3) = Respeita Config
-        // FakeNews (5) = Sem tempo
         if (card.tipo === 4) {
             window.app.startTimer(4, card.pontos, 300);
         } else if (card.tipo >= 1 && card.tipo <= 3 && window.app.useTimer) {
@@ -180,7 +176,6 @@ window.app = {
         const typeNames = {1: "Ed. Midiática", 2: "Mídia Recurso", 3: "Prática Docente"};
 
         if (tipo >= 1 && tipo <= 3) {
-            // Cartas de Problema zeram a pontuação no esgotamento
             const area = document.getElementById('options-area');
             area.querySelectorAll('button').forEach(b => {
                 b.disabled = true;
@@ -204,7 +199,6 @@ window.app = {
             document.getElementById('btn-next').classList.replace('bg-cyan-700', 'bg-orange-600');
 
         } else if (tipo === 4) {
-            // Carta Dourada PONTUA NORMALMENTE com 10 pts após o debate
             document.getElementById('btn-golden-action').disabled = true;
             window.app.groups[window.app.turn].history.push({
                 carta: "Mergulhe Fundo",
@@ -223,44 +217,46 @@ window.app = {
     },
 
     renderCardHTML: (c) => {
-        // Constrói o HUD do Cronômetro Quadrado Flutuante
+        // Híbrido: Barra horizontal no Mobile (relative + flex-row), Quadrado no Desktop (absolute + flex-col)
         let timerSquareHTML = '';
         if (c.tipo === 4) {
-            // Sempre 5 Minutos (300s) na Dourada
             timerSquareHTML = `
-            <div id="timer-square" class="absolute -top-6 -right-3 md:-top-8 md:-right-8 w-24 h-24 md:w-32 md:h-32 bg-slate-900 border-4 border-yellow-600 rounded-2xl flex flex-col items-center justify-center shadow-2xl z-20 transform rotate-3">
-                <span class="text-[10px] md:text-xs text-yellow-500 uppercase font-black tracking-widest mb-1">Debate</span>
-                <span id="modal-timer-display" class="font-mono text-2xl md:text-4xl font-black text-yellow-400 leading-none drop-shadow-md">05:00</span>
+            <div id="timer-square" class="relative md:absolute md:-top-8 md:-right-8 w-full md:w-32 bg-slate-900 border-2 md:border-4 border-yellow-600 rounded-xl md:rounded-2xl flex flex-row md:flex-col items-center justify-between md:justify-center shadow-lg md:shadow-2xl z-20 md:transform md:rotate-3 p-3 px-5 md:p-0 md:h-32 mb-6 md:mb-0 mt-3 md:mt-0">
+                <span class="text-xs md:text-xs text-yellow-500 uppercase font-black tracking-widest md:mb-1">Debate</span>
+                <span id="modal-timer-display" class="font-mono text-3xl md:text-4xl font-black text-yellow-400 leading-none drop-shadow-md">05:00</span>
             </div>`;
         } else if (c.tipo >= 1 && c.tipo <= 3 && window.app.useTimer) {
-            // Configurado pelo usuário nas Cartas de Problema
             timerSquareHTML = `
-            <div id="timer-square" class="absolute -top-6 -right-3 md:-top-8 md:-right-8 w-24 h-24 md:w-32 md:h-32 bg-slate-950 border-4 border-cyan-700 rounded-2xl flex flex-col items-center justify-center shadow-2xl z-20 transform rotate-3">
-                <span class="text-[10px] md:text-xs text-slate-400 uppercase font-bold tracking-widest mb-1">Tempo</span>
-                <span id="modal-timer-display" class="font-mono text-2xl md:text-4xl font-black text-cyan-400 leading-none drop-shadow-md">${window.app.formatTime(window.app.timeLimit)}</span>
+            <div id="timer-square" class="relative md:absolute md:-top-8 md:-right-8 w-full md:w-32 bg-slate-950 border-2 md:border-4 border-cyan-700 rounded-xl md:rounded-2xl flex flex-row md:flex-col items-center justify-between md:justify-center shadow-lg md:shadow-2xl z-20 md:transform md:rotate-3 p-3 px-5 md:p-0 md:h-32 mb-6 md:mb-0 mt-3 md:mt-0">
+                <span class="text-xs md:text-xs text-slate-400 uppercase font-bold tracking-widest md:mb-1">Tempo</span>
+                <span id="modal-timer-display" class="font-mono text-3xl md:text-4xl font-black text-cyan-400 leading-none drop-shadow-md">${window.app.formatTime(window.app.timeLimit)}</span>
             </div>`;
         }
 
         if(c.tipo === 4) {
             return `
-            <div class="card-golden rounded-2xl p-6 md:p-10 relative mt-4">
-                <div class="absolute -top-4 -left-2 md:-left-4 bg-yellow-900 text-yellow-300 font-black px-4 py-2 md:px-6 md:py-2 rounded-full shadow-lg border-2 border-yellow-600 text-base md:text-xl z-20 uppercase tracking-wider drop-shadow-md">10 PONTOS</div>
+            <div class="card-golden rounded-2xl p-5 md:p-10 relative mt-6 md:mt-4">
+                <div class="absolute -top-4 left-4 md:-left-4 bg-yellow-900 text-yellow-300 font-black px-4 py-1 md:px-6 md:py-2 rounded-full shadow-lg border-2 border-yellow-600 text-sm md:text-xl z-20 uppercase tracking-wider drop-shadow-md">10 PONTOS</div>
+                
                 ${timerSquareHTML}
-                <h2 class="text-3xl md:text-4xl font-black mb-4 text-yellow-950">Mergulhe mais fundo</h2>
-                <div class="bg-yellow-900/10 p-5 md:p-6 rounded-xl border border-yellow-700/40 mb-6 italic font-medium text-xl md:text-2xl leading-relaxed text-yellow-950 shadow-inner">"${c.recorte}"</div>
-                <h3 class="font-black uppercase tracking-wider mb-4 text-lg md:text-xl text-yellow-900">Questão Norteadora (Plenária):</h3>
-                <p class="font-bold text-yellow-950 text-2xl md:text-3xl leading-snug mb-8 bg-yellow-100 p-6 rounded-xl shadow-sm border border-yellow-400/50">
+                
+                <div class="md:pr-28"> <!-- Margem de segurança para o cronômetro no desktop -->
+                    <h2 class="text-2xl md:text-4xl font-black mb-4 text-yellow-950">Mergulhe mais fundo</h2>
+                    <div class="bg-yellow-900/10 p-4 md:p-6 rounded-xl border border-yellow-700/40 mb-6 italic font-medium text-lg md:text-2xl leading-relaxed text-yellow-950 shadow-inner">"${c.recorte}"</div>
+                </div>
+                
+                <h3 class="font-black uppercase tracking-wider mb-3 md:mb-4 text-base md:text-xl text-yellow-900">Questão Norteadora (Plenária):</h3>
+                <p class="font-bold text-yellow-950 text-xl md:text-3xl leading-snug mb-8 bg-yellow-100 p-5 md:p-6 rounded-xl shadow-sm border border-yellow-400/50">
                     ${c.perguntas[0]}
                 </p>
                 <div id="debate-msg-area"></div>
-                <button id="btn-golden-action" onclick="window.app.finishTurn(${c.pontos})" class="w-full mt-4 bg-yellow-900 hover:bg-yellow-800 text-yellow-100 font-black py-4 rounded-xl transition-all shadow-xl text-xl uppercase tracking-widest border border-yellow-700">Encerrar e Pontuar (+10 Pts)</button>
+                <button id="btn-golden-action" onclick="window.app.finishTurn(${c.pontos})" class="w-full mt-2 bg-yellow-900 hover:bg-yellow-800 text-yellow-100 font-black py-4 rounded-xl transition-all shadow-xl text-lg md:text-xl uppercase tracking-widest border border-yellow-700">Encerrar (+10 Pts)</button>
             </div>`;
         }
         
         if(c.tipo === 5) {
-            // Fake News não tem timer, mostra os pontos dinamicamente
             return `
-            <div class="card-fake rounded-2xl p-8 md:p-12 relative text-center">
+            <div class="card-fake rounded-2xl p-6 md:p-12 relative text-center mt-6 md:mt-4">
                 <div class="text-7xl md:text-9xl mb-6 drop-shadow-2xl">🚨</div>
                 <h2 class="text-4xl md:text-6xl font-black mb-6 uppercase tracking-widest text-red-400 drop-shadow-md">Fake News!</h2>
                 <p class="text-2xl md:text-4xl font-bold mb-10 leading-snug text-red-100 bg-red-950/50 p-6 rounded-2xl border border-red-800/50 shadow-inner">${c.fakeNews}</p>
@@ -270,14 +266,17 @@ window.app = {
         
         const typeNames = {1: "Cultura Digital", 2: "Mídia como Recurso", 3: "Prática Docente"};
         return `
-        <div class="card-base relative p-6 md:p-10 mt-4">
-            <div class="absolute -top-4 -left-2 md:-left-4 bg-cyan-950 text-cyan-400 font-black px-4 py-2 rounded-full shadow-lg border-2 border-cyan-700 text-sm md:text-lg z-20 uppercase tracking-widest">${typeNames[c.tipo]}</div>
-            <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-slate-700 text-slate-200 font-black px-6 py-2 rounded-full shadow-lg border-2 border-slate-500 text-sm md:text-lg z-20 uppercase">${c.pontos} Pts</div>
+        <div class="card-base relative p-5 md:p-10 mt-6 md:mt-4">
+            <div class="absolute -top-4 left-4 md:-left-4 bg-cyan-950 text-cyan-400 font-black px-3 md:px-4 py-1 md:py-2 rounded-full shadow-lg border-2 border-cyan-700 text-xs md:text-lg z-20 uppercase tracking-widest">${typeNames[c.tipo]}</div>
+            <div class="absolute -top-4 right-4 md:left-1/2 md:-translate-x-1/2 bg-slate-700 text-slate-200 font-black px-4 md:px-6 py-1 md:py-2 rounded-full shadow-lg border-2 border-slate-500 text-xs md:text-lg z-20 uppercase">${c.pontos} Pts</div>
+            
             ${timerSquareHTML}
             
-            <p class="text-2xl md:text-4xl font-bold text-slate-100 mb-8 leading-snug mt-6">${c.cenario}</p>
+            <div class="md:pr-28 ${window.app.useTimer ? 'mt-0' : 'mt-4'}"> <!-- Margem de segurança contra sobreposição no Desktop -->
+                <p class="text-xl md:text-3xl font-bold text-slate-100 mb-6 md:mb-8 leading-snug">${c.cenario}</p>
+            </div>
             
-            <div id="options-area" class="space-y-4 mb-4">
+            <div id="options-area" class="space-y-3 md:space-y-4 mb-4">
                 ${c.alternativas.map((opt) => `
                     <button data-correct="${opt.correta}" onclick="window.app.verifyAnswer(this, ${opt.correta}, ${c.pontos})" class="w-full text-left p-4 md:p-5 rounded-2xl border-2 border-slate-600 bg-slate-800 hover:bg-slate-700 transition-all text-lg md:text-xl text-slate-200 font-medium leading-snug shadow-md">
                         ${opt.texto}
@@ -311,7 +310,6 @@ window.app = {
             status: isCorrect ? '<span class="text-emerald-400 font-bold">Acertou</span>' : '<span class="text-rose-400 font-bold">Errou</span>'
         });
 
-        // Revela a Resposta Correta visualmente independente do que o usuário clicou
         area.querySelectorAll('button').forEach(b => {
             if(b.getAttribute('data-correct') === 'true') {
                 b.classList.replace('bg-slate-800', 'bg-emerald-900');
@@ -400,9 +398,9 @@ window.app = {
             const isTurn = window.app.isGroupMode ? (g.name === window.app.groups[window.app.turn].name) : true;
             
             ranking.innerHTML += `
-                <div class="rank-item bg-slate-800 border ${isTurn ? 'border-cyan-500 bg-slate-700 shadow-[0_0_15px_rgba(34,211,238,0.3)] scale-105' : 'border-slate-700'} p-3 md:p-4 rounded-xl flex flex-col md:flex-row justify-between items-center transition-all duration-300 flex-1 min-w-[100px] mb-2 md:mb-0">
+                <div class="rank-item bg-slate-800 border ${isTurn ? 'border-cyan-500 bg-slate-700 shadow-[0_0_15px_rgba(34,211,238,0.3)] scale-[1.02] z-10' : 'border-slate-700'} p-3 md:p-4 rounded-xl flex flex-col md:flex-row justify-between items-center transition-all duration-300 flex-1 min-w-[40%] md:min-w-full mb-1 md:mb-0">
                     <span class="font-bold text-sm md:text-lg text-center md:text-left truncate w-full ${isTurn ? 'text-cyan-300' : 'text-slate-300'}">${g.name}</span>
-                    <span class="bg-slate-900 px-3 py-1.5 md:px-4 md:py-2 rounded-lg font-mono text-cyan-400 font-black border border-slate-700 text-base md:text-xl mt-2 md:mt-0">${g.score}</span>
+                    <span class="bg-slate-900 px-3 py-1.5 md:px-4 md:py-2 rounded-lg font-mono text-cyan-400 font-black border border-slate-700 text-base md:text-xl mt-2 md:mt-0 w-full md:w-auto text-center">${g.score}</span>
                 </div>
             `;
         });
