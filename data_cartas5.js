@@ -1,14 +1,22 @@
 const cartasTipo5 = [
     { tipo: 5, pontos: -2, fakeNews: "Você compartilhou a notícia de que o Senac cancelou todos os cursos presenciais e agora será tudo no Metaverso." },
-    { tipo: 5, pontos: -2, fakeNews: "Você compartilhou a notícia de que alterar o arquivo 'hosts' do Windows magicamente deixa a internet 1000% mais rápida." },
-    { tipo: 5, pontos: -2, fakeNews: "Você compartilhou um meme afirmando que as urnas eletrônicas rodam em um servidor do Minecraft." },
+    { tipo: 5, pontos: -2, fakeNews: "Você compartilhou um link falso prometendo ferramentas pagas de graça, o que instalou um ransomware e bloqueou o projeto da sua equipe." },
+    { tipo: 5, pontos: -2, fakeNews: "Você espalhou um boato sobre um colega de sala usando um vídeo manipulado (deepfake), ferindo a ética e configurando cyberbullying." },
     { tipo: 5, pontos: -2, fakeNews: "Você compartilhou a notícia de que o ChatGPT foi adquirido pelo Governo Federal e passará a cobrar impostos por mensagem." },
-    { tipo: 5, pontos: -2, fakeNews: "Você curtiu e compartilhou que a configuração mime-type no lighttpd causa incêndios espontâneos no servidor físico." },
+    { tipo: 5, pontos: -2, fakeNews: "Você vazou acidentalmente dados reais de clientes em um fórum público ao tentar tirar uma dúvida técnica de banco de dados, violando gravemente a LGPD." },
     { tipo: 5, pontos: -2, fakeNews: "Você enviou em todos os grupos que carregar o celular dentro do micro-ondas carrega a bateria em 5 segundos." },
-    { tipo: 5, pontos: -2, fakeNews: "Você retuitou que profissionais de TI serão todos substituídos por IA em 2 meses e que o diploma não vale nada." },
-    { tipo: 5, pontos: -2, fakeNews: "Você alertou seus amigos que a vacina atualiza o driver do 5G direto no seu DNA sem checar a fonte." },
-    { tipo: 5, pontos: -2, fakeNews: "Você encaminhou um áudio falso dizendo que a direção do Senac bloqueou o uso de qualquer rede social no bairro inteiro." },
-    { tipo: 5, pontos: -2, fakeNews: "Você postou que criar servidores Docker gasta mais água que a agricultura local." }
+    { tipo: 5, pontos: -2, fakeNews: "Você clicou em um e-mail de phishing disfarçado de 'Vaga de Emprego Urgente' e comprometeu as senhas do sistema da escola." },
+    { tipo: 5, pontos: -2, fakeNews: "Você alertou seus amigos que a vacina atualiza o driver do 5G direto no seu DNA sem checar a confiabilidade da fonte." },
+    { tipo: 5, pontos: -2, fakeNews: "Você acessou a nuvem da empresa em um Wi-Fi público de praça sem usar VPN, teve sua sessão interceptada e ignorou as boas práticas de segurança." },
+    { tipo: 5, pontos: -2, fakeNews: "Você compartilhou a notícia de que alterar o arquivo 'hosts' do Windows magicamente deixa a internet 1000% mais rápida sem analisar criticamente a técnica." },
+    { tipo: 5, pontos: -2, fakeNews: "Você aceitou o pedido de conexão de um falso recrutador no LinkedIn e forneceu informações sensíveis da topologia de rede da sua empresa." },
+    { tipo: 5, pontos: -2, fakeNews: "Você espalhou no grupo da sala um print falsificado dizendo que o Projeto Integrador foi cancelado, gerando pânico e desinformação na turma." },
+    { tipo: 5, pontos: -2, fakeNews: "Você copiou um código inteiro de um repositório fechado, sem dar os créditos ao autor, e entregou no seu TCC afirmando ser 100% autoral (Plágio/Falta de Ética)." },
+    { tipo: 5, pontos: -2, fakeNews: "Você acreditou em um e-mail de 'Verificação de Segurança' e digitou seu código de Autenticação de 2 Fatores (2FA) em uma página clonada." },
+    { tipo: 5, pontos: -2, fakeNews: "Você utilizou e defendeu estatísticas geradas por Inteligência Artificial no seu projeto sem checar a fonte, descobrindo depois que a IA havia alucinado os números." },
+    { tipo: 5, pontos: -2, fakeNews: "Você presenciou colegas humilhando um aluno novo em um servidor do Discord acadêmico e curtiu a mensagem, falhando no papel de espectador ativo." },
+    { tipo: 5, pontos: -2, fakeNews: "Você instalou um app não oficial que prometia 'Ver quem visitou seu perfil' e acabou concedendo acesso a todos os seus contatos e senhas." },
+    { tipo: 5, pontos: -2, fakeNews: "Você baixou uma versão 'crackeada' de um software de edição recomendado por um influenciador e infectou os computadores do laboratório com um keylogger." },
+    { tipo: 5, pontos: -2, fakeNews: "Você recebeu uma mensagem no WhatsApp clonado de um suposto colega pedindo dinheiro urgente para pagar o servidor do projeto e fez o PIX sem ligar para confirmar." },
+    { tipo: 5, pontos: -2, fakeNews: "Você comprou uma câmera de segurança super barata da internet sem ler os termos, e depois descobriu que ela transmitia suas imagens de rede para um servidor aberto." }
 ];
-// Autopreenchimento mecânico para alcançar 20 cartas sorteadas de punição
-for(let i=11; i<=20; i++){ cartasTipo5.push(cartasTipo5[Math.floor(Math.random()*10)]); }

@@ -34,14 +34,44 @@ window.app = {
             return;
         }
 
-        const getRand = (arr, n) => [...arr].sort(() => 0.5 - Math.random()).slice(0, n);
+        // Função robusta que filtra duplicatas e sorteia cartas únicas
+        const getUniqueRand = (arr, numItems) => {
+            const uniqueArr = [];
+            const seen = new Set();
+            
+            // Passo 1: Remove qualquer carta duplicada baseada no seu texto principal
+            arr.forEach(item => {
+                const identifier = item.cenario || item.recorte || item.fakeNews;
+                if (!seen.has(identifier)) {
+                    seen.add(identifier);
+                    uniqueArr.push(item);
+                }
+            });
+
+            // Passo 2: Embaralha as cartas únicas (Algoritmo Fisher-Yates)
+            for (let i = uniqueArr.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [uniqueArr[i], uniqueArr[j]] = [uniqueArr[j], uniqueArr[i]];
+            }
+
+            // Passo 3: Retorna a quantidade exata de cartas solicitadas
+            return uniqueArr.slice(0, numItems);
+        };
         
-        // Embaralha todas as 24 cartas selecionadas
+        // Sorteia as cartas garantindo a não repetição (5 de T1-T4 e 4 de T5)
         window.app.deck = [
-            ...getRand(cartasTipo1, 5), ...getRand(cartasTipo2, 5),
-            ...getRand(cartasTipo3, 5), ...getRand(cartasTipo4, 5),
-            ...getRand(cartasTipo5, 4)
-        ].sort(() => 0.5 - Math.random());
+            ...getUniqueRand(cartasTipo1, 5), 
+            ...getUniqueRand(cartasTipo2, 5),
+            ...getUniqueRand(cartasTipo3, 5), 
+            ...getUniqueRand(cartasTipo4, 5),
+            ...getUniqueRand(cartasTipo5, 4)
+        ];
+
+        // Embaralha o deck final para as posições no painel ficarem misturadas
+        for (let i = window.app.deck.length - 1; i > 0; i--) {
+            const j = Math.floor(Math.random() * (i + 1));
+            [window.app.deck[i], window.app.deck[j]] = [window.app.deck[j], window.app.deck[i]];
+        }
 
         // Inicializa o status de todas as 24 cartas como "fechadas" (false)
         window.app.cardsStatus = new Array(24).fill(false);
@@ -100,7 +130,7 @@ window.app = {
                 <div class="absolute -top-4 -right-4 bg-yellow-900 text-yellow-300 font-bold px-4 py-1 rounded-full shadow-lg border border-yellow-700">10 PONTOS</div>
                 <h2 class="text-xl md:text-2xl font-bold mb-2">Mergulhe mais fundo (Debate)</h2>
                 <div class="bg-yellow-900/10 p-3 md:p-4 rounded-lg border border-yellow-700/30 mb-4 md:mb-6 italic font-medium text-base md:text-lg leading-relaxed">"${c.recorte}"</div>
-                <h3 class="font-bold uppercase tracking-wider mb-2 md:mb-3 text-sm md:text-base">Questões Norteadoras:</h3>
+                <h3 class="font-bold uppercase tracking-wider mb-2 md:mb-3 text-sm md:text-base">Questão Norteadora:</h3>
                 <ul class="list-disc pl-5 space-y-2 md:space-y-3 mb-6 font-medium text-yellow-950 text-sm md:text-base">
                     ${c.perguntas.map(p => `<li>${p}</li>`).join('')}
                 </ul>
