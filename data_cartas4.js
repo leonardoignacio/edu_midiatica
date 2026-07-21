@@ -118,5 +118,65 @@ const cartasTipo4 = [
         pontos: 10, 
         recorte: "É fundamental planejar deliberadamente uma rota na qual o aluno reflete sobre: propósito, autoria, credibilidade e os efeitos da mensagem.", 
         perguntas: ["Como a simples pergunta 'Quem financiou ou quem lucra com este artigo?' pode mudar completamente a sua visão sobre uma tecnologia ou solução revolucionária?"] 
+    },
+    { 
+        tipo: 4, 
+        pontos: 10, 
+        recorte: "A educação midiática pode ser considerada uma aliada das competências da Cultura Digital, fornecendo o arcabouço necessário de habilidades para atuar de forma consciente e autônoma no ambiente digital.", 
+        perguntas: ["De que maneira o domínio consciente das habilidades de educação midiática fortalece a tomada de decisões de um profissional em momentos de crise tecnológica?"] 
+    },
+    { 
+        tipo: 4, 
+        pontos: 10, 
+        recorte: "A análise crítica da mídia refere-se à habilidade de decodificar textos de mídia e compreender os meios de comunicação como um sistema complexo, âmbito de disputa de poder e interesses.", 
+        perguntas: ["Como a compreensão dos interesses ocultos por trás de grandes corporações de tecnologia altera a forma como avaliamos a adoção de novas ferramentas em nossa empresa?"] 
+    },
+    { 
+        tipo: 4, 
+        pontos: 10, 
+        recorte: "O letramento informacional e a verificação de fontes evitam que o indivíduo aja de forma ingênua ou guiada por automatismos diante do enorme fluxo de dados.", 
+        perguntas: ["Quais rotinas diárias de checagem você pode implementar para garantir que os dados manipulados em sua rotina profissional sejam livres de manipulações tendenciosas?"] 
+    },
+    { 
+        tipo: 4, 
+        pontos: 10, 
+        recorte: "A autoexpressão refere-se à habilidade de criar narrativas de forma multimodal e intencional, para audiências reais e com responsabilidade.", 
+        perguntas: ["Como a responsabilidade autoral ao redigir documentações técnicas ou relatórios públicos afeta diretamente a reputação institucional da sua equipe?"] 
+    },
+    { 
+        tipo: 4, 
+        pontos: 10, 
+        recorte: "A fluência digital incentiva explorar o potencial narrativo de vários formatos de mídia de modo reflexivo, escolhendo recursos condizentes aos objetivos de comunicação.", 
+        perguntas: ["Por que a escolha inadequada de uma ferramenta de mídia para apresentar um projeto complexo pode sabotar a compreensão do cliente ou da banca avaliadora?"] 
+    },
+    { 
+        tipo: 4, 
+        pontos: 10, 
+        recorte: "A cidadania digital envolve interagir de forma segura e responsável nas plataformas digitais, consciente do significado e das implicações de curtir, comentar e compartilhar.", 
+        perguntas: ["De que maneira um simples compartilhamento desatento de uma postagem corporativa em redes sociais pode violar acordos de confidencialidade e ética profissional?"] 
+    },
+    { 
+        tipo: 4, 
+        pontos: 10, 
+        recorte: "A participação cidadã diz respeito a usar mídias para resolver problemas e atuar na sociedade, a partir da produção de conteúdos com a intenção de engajar, mobilizar e deixar legado.", 
+        perguntas: ["De que forma os conhecimentos adquiridos em sua formação técnica podem ser transformados em campanhas digitais para orientar a sociedade contra golpes cibernéticos?"] 
+    },
+    { 
+        tipo: 4, 
+        pontos: 10, 
+        recorte: "O princípio da intencionalidade orienta estabelecer objetivos de educação midiática articulados aos conteúdos curriculares, planejando deliberadamente rotas de reflexão.", 
+        perguntas: ["Como a introdução intencional de debates éticos e midiáticos nas aulas técnicas evita a formação de profissionais puramente mecânicos e descolados da realidade social?"] 
+    },
+    { 
+        tipo: 4, 
+        pontos: 10, 
+        recorte: "O protocolo de avaliação de conteúdos gerados por IA sugere examinar a razão, a observação de aberrações visuais e textuais, e o apelo às emoções e vieses.", 
+        perguntas: ["Por que as ferramentas de inteligência artificial costumam explorar as nossas emoções e medos para nos induzir a acreditar em falácias tecnológicas?"] 
+    },
+    { 
+        tipo: 4, 
+        pontos: 10, 
+        recorte: "As Diretrizes Educacionais para Aprendizagem na Cultura Digital e o documento de Orientações Pedagógicas do Senac reforçam a formação voltada à autonomia, ética e inovação.", 
+        perguntas: ["Como a marca formativa 'Autonomia Digital' apoia o egresso do Senac a se manter relevante em um mercado de trabalho em constante mutação tecnológica?"] 
     }
 ];

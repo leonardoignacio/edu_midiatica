@@ -18,5 +18,15 @@ const cartasTipo5 = [
     { tipo: 5, pontos: -3, fakeNews: "Você instalou um app não oficial que prometia 'Ver quem visitou seu perfil' e acabou concedendo acesso indevido a todos os seus contatos." },
     { tipo: 5, pontos: -5, fakeNews: "Você baixou uma versão 'crackeada' de um software de edição recomendado por um influenciador e infectou os computadores do laboratório." },
     { tipo: 5, pontos: -3, fakeNews: "Você recebeu uma mensagem no WhatsApp clonado de um colega pedindo PIX urgente para pagar o servidor do projeto e transferiu sem ligar para confirmar." },
-    { tipo: 5, pontos: -4, fakeNews: "Você comprou uma câmera IoT super barata da internet sem ler os termos e configurou na rede principal, criando uma brecha de segurança enorme." }
+    { tipo: 5, pontos: -4, fakeNews: "Você comprou uma câmera IoT super barata da internet sem ler os termos e configurou na rede principal, criando uma brecha de segurança enorme." },
+    { tipo: 5, pontos: -4, fakeNews: "Você repassou uma fake news afirmando que o sistema de login de um grande banco nacional havia colapsado totalmente, gerando pânico em canais de suporte." },
+    { tipo: 5, pontos: -5, fakeNews: "Você utilizou um gerador de chaves piratas (keygen) encontrado em site desconhecido para ativar um ambiente de desenvolvimento, comprometendo a rede corporativa inteira." },
+    { tipo: 5, pontos: -3, fakeNews: "Você divulgou dados parciais e distorcidos de desempenho de colegas de equipe em um grupo aberto para constrangê-los publicamente." },
+    { tipo: 5, pontos: -4, fakeNews: "Você clicou em um link falso de atualização de certificado SSL enviado por SMS, entregando acesso administrativo ao seu servidor de produção." },
+    { tipo: 5, pontos: -3, fakeNews: "Você propagou um boato de que a instituição iria cobrar taxas retroativas de matrícula com base em postagens anônimas de redes sociais." },
+    { tipo: 5, pontos: -5, fakeNews: "Você ignorou deliberadamente sinais de invasão em um banco de dados sob sua responsabilidade e omitiu o fato para evitar cobranças, violando protocolos de segurança." },
+    { tipo: 5, pontos: -3, fakeNews: "Você compartilhou um tutorial fraudulento que instruía a desativar todos os firewalls do sistema operacional para 'acelerar a conexão de internet'." },
+    { tipo: 5, pontos: -4, fakeNews: "Você respondeu a uma mensagem de phishing corporativo informando a sua senha mestra de acesso após ser pressionado por um falso tom de urgência." },
+    { tipo: 5, pontos: -5, fakeNews: "Você publicou imagens de telas de código proprietário de um cliente em suas redes sociais para se exibir, quebrando acordos de confidencialidade (NDA)." },
+    { tipo: 5, pontos: -3, fakeNews: "Você repassou uma corrente alarmista afirmando que o uso prolongado de fones de ouvido em aulas remotas causava perda auditiva irreversível em 24 horas." }
 ];
