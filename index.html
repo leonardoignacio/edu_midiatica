@@ -10,8 +10,8 @@
 <body class="bg-slate-900 text-slate-100 min-h-screen font-sans overflow-hidden">
 
     <!-- Tela Inicial -->
-    <div id="screen-intro" class="screen active flex flex-col items-center justify-center min-h-screen p-4 md:p-6">
-        <div class="max-w-2xl text-center bg-slate-800 p-6 md:p-8 rounded-2xl border border-slate-700 shadow-2xl w-full">
+    <div id="screen-intro" class="screen active flex-col items-center justify-start h-screen overflow-y-auto p-4 md:p-6 w-full">
+        <div class="max-w-2xl text-center bg-slate-800 p-6 md:p-8 rounded-2xl border border-slate-700 shadow-2xl w-full mt-10 mb-10 md:mt-auto md:mb-auto shrink-0">
             <h1 class="text-3xl md:text-5xl font-black text-cyan-400 mb-4 tracking-tight">Cultura Digital em Jogo</h1>
             <p class="text-slate-300 mb-6 text-lg md:text-xl font-medium leading-relaxed">Um jogo de cartas sobre Educação Midiática e metodologias ativas. Debata, analise informações e guie sua equipe na construção da autonomia digital.</p>
             <ul class="text-left text-slate-400 mb-8 space-y-3 text-sm md:text-base bg-slate-900 p-5 rounded-lg border border-slate-700/50">
@@ -26,8 +26,8 @@
     </div>
 
     <!-- Tela de Setup (Configurações) -->
-    <div id="screen-setup" class="screen flex flex-col items-center justify-center min-h-screen p-4 md:p-6 overflow-y-auto">
-        <div class="max-w-md w-full bg-slate-800 p-6 md:p-8 rounded-2xl border border-slate-700 shadow-2xl my-auto">
+    <div id="screen-setup" class="screen flex-col items-center justify-start h-screen overflow-y-auto p-4 md:p-6 w-full">
+        <div class="max-w-md w-full bg-slate-800 p-6 md:p-8 rounded-2xl border border-slate-700 shadow-2xl mt-10 mb-10 md:mt-auto md:mb-auto shrink-0">
             <h2 class="text-2xl font-bold text-center text-cyan-400 mb-6">Configurações</h2>
             
             <div class="space-y-5 mb-8 text-left w-full">
@@ -63,7 +63,7 @@
                     </div>
                 </div>
 
-                <!-- Quadro 2: Cronômetro -->
+                <!-- Quadro 2: Cronômetro (Apenas para Problemas) -->
                 <div class="bg-slate-900 p-4 md:p-5 rounded-xl border border-slate-700">
                     <h3 class="font-bold text-cyan-300 mb-4 uppercase tracking-wider text-xs md:text-sm">Cronômetro (Cartas de Problema)</h3>
                     <div class="flex flex-col gap-3">
@@ -91,14 +91,13 @@
 
     <!-- Tela de Jogo -->
     <div id="screen-game" class="screen h-screen flex flex-col md:flex-row overflow-hidden">
-        <!-- Sidebar Ranking (Ajustado overflow e wrap) -->
+        <!-- Sidebar Ranking -->
         <div class="w-full md:w-80 bg-slate-900 border-b md:border-b-0 md:border-l border-slate-700 p-3 md:p-6 flex flex-col shadow-2xl z-30 order-1 md:order-2 shrink-0 md:h-full overflow-y-auto">
             <div class="flex justify-between items-center md:block mb-3 md:mb-6">
                 <h3 id="ranking-title" class="text-sm md:text-lg font-bold text-slate-400 uppercase tracking-wider">Ranking</h3>
                 <div class="block md:hidden text-xs text-slate-500">Restantes: <span id="cards-left-mobile" class="font-bold text-slate-300">24</span></div>
             </div>
             
-            <!-- Flex-wrap adicionado aqui para quebrar linha no mobile se não couber -->
             <div id="ranking-list" class="flex flex-row md:flex-col flex-wrap gap-2 md:gap-4 w-full"></div>
             
             <div class="hidden md:block mt-auto pt-4 border-t border-slate-800 text-center text-xs text-slate-500">
@@ -122,9 +121,8 @@
     </div>
 
     <!-- Tela de Vitória Final -->
-    <div id="screen-victory" class="screen flex flex-col items-center justify-start min-h-screen p-4 md:p-10 overflow-y-auto w-full">
-        <!-- Mantém igual o atual... -->
-        <div class="text-center mb-8 md:mb-10 w-full victory-enter mt-4">
+    <div id="screen-victory" class="screen flex-col items-center justify-start h-screen overflow-y-auto p-4 md:p-10 w-full pb-20">
+        <div class="text-center mb-8 md:mb-10 w-full victory-enter mt-10 shrink-0">
             <div class="text-5xl md:text-8xl mb-4">🏆</div>
             <h1 id="victory-title" class="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-600 mb-2 uppercase tracking-tight">Grupo Vencedor!</h1>
             <h2 id="winner-name" class="text-3xl md:text-6xl font-bold text-white mb-6 break-words px-4">...</h2>
@@ -132,11 +130,11 @@
                 <span id="winner-score">0 Pts</span>
             </div>
         </div>
-        <div class="w-full max-w-6xl victory-enter" style="animation-delay: 0.2s;">
+        <div class="w-full max-w-6xl victory-enter shrink-0" style="animation-delay: 0.2s;">
             <h3 class="text-xl md:text-2xl font-bold text-cyan-400 mb-4 md:mb-6 text-center uppercase tracking-widest">Resumo da Partida</h3>
             <div id="victory-tables" class="w-full flex flex-col gap-6 md:gap-8"></div>
         </div>
-        <button onclick="location.reload()" class="mt-10 mb-8 bg-cyan-700 hover:bg-cyan-600 text-white font-bold py-4 px-10 rounded-xl transition-all text-base md:text-lg shadow-lg victory-enter w-full md:w-auto" style="animation-delay: 0.4s;">
+        <button onclick="location.reload()" class="mt-10 mb-8 bg-cyan-700 hover:bg-cyan-600 text-white font-bold py-4 px-10 rounded-xl transition-all text-base md:text-lg shadow-lg victory-enter w-full md:w-auto shrink-0" style="animation-delay: 0.4s;">
             JOGAR NOVAMENTE
         </button>
     </div>
