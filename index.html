@@ -12,49 +12,95 @@
     <!-- Tela Inicial -->
     <div id="screen-intro" class="screen active flex flex-col items-center justify-center min-h-screen p-4 md:p-6">
         <div class="max-w-2xl text-center bg-slate-800 p-6 md:p-8 rounded-2xl border border-slate-700 shadow-2xl w-full">
-            <h1 class="text-3xl md:text-4xl font-bold text-cyan-400 mb-4">Cultura Digital em Jogo</h1>
-            <p class="text-slate-300 mb-6 text-base md:text-lg">Um jogo de cartas sobre Educação Midiática e metodologias ativas. Debata, analise informações e guie sua equipe na construção da autonomia digital.</p>
-            <ul class="text-left text-slate-400 mb-8 space-y-2 text-xs md:text-sm bg-slate-900 p-4 rounded-lg">
-                <li>💡 <strong>Tipos 1 a 3:</strong> Situações-problema (1 a 5 pontos). Acerte para pontuar.</li>
-                <li>🌟 <strong>Tipo 4 (Dourada):</strong> Carta de debate (10 pontos). Discuta em plenária.</li>
-                <li>🚨 <strong>Tipo 5 (Fake News):</strong> Penalidade automática (-2 pontos).</li>
+            <h1 class="text-3xl md:text-5xl font-black text-cyan-400 mb-4 tracking-tight">Cultura Digital em Jogo</h1>
+            <p class="text-slate-300 mb-6 text-lg md:text-xl font-medium leading-relaxed">Um jogo de cartas sobre Educação Midiática e metodologias ativas. Debata, analise informações e guie sua equipe na construção da autonomia digital.</p>
+            <ul class="text-left text-slate-400 mb-8 space-y-3 text-sm md:text-base bg-slate-900 p-5 rounded-lg border border-slate-700/50">
+                <li>💡 <strong>Tipos 1 a 3:</strong> Situações-problema (1 a 5 pontos).</li>
+                <li>🌟 <strong>Tipo 4 (Dourada):</strong> Carta de debate (10 pontos - 5 Minutos Fixos).</li>
+                <li>🚨 <strong>Tipo 5 (Fake News):</strong> Penalidade automática de -1 a -5 pontos.</li>
             </ul>
-            <button onclick="window.app.showSetup()" class="w-full md:w-auto bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-4 md:py-3 px-8 rounded-full transition-all transform hover:scale-105 shadow-lg shadow-cyan-500/30">
-                JOGAR
+            <button onclick="window.app.showSetup()" class="w-full md:w-auto bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-4 md:py-3 px-10 rounded-full transition-all transform hover:scale-105 shadow-lg shadow-cyan-500/30 text-xl">
+                INICIAR
             </button>
         </div>
     </div>
 
-    <!-- Tela de Setup -->
-    <div id="screen-setup" class="screen flex flex-col items-center justify-center min-h-screen p-4 md:p-6">
-        <div class="max-w-md w-full bg-slate-800 p-6 md:p-8 rounded-2xl border border-slate-700 shadow-2xl">
-            <h2 class="text-2xl font-bold text-center text-cyan-400 mb-6">Cadastrar Grupos</h2>
-            <div class="space-y-4 mb-8">
-                <input type="text" id="g1-name" placeholder="Nome do Grupo 1" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-slate-200 focus:outline-none focus:border-cyan-500">
-                <input type="text" id="g2-name" placeholder="Nome do Grupo 2" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-slate-200 focus:outline-none focus:border-cyan-500">
-                <input type="text" id="g3-name" placeholder="Nome do Grupo 3" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-slate-200 focus:outline-none focus:border-cyan-500">
-            </div>
-            <button onclick="window.app.startGame()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 md:py-3 rounded-lg transition-all shadow-lg shadow-emerald-600/30">
-                INICIAR PARTIDA
-            </button>
-        </div>
-    </div>
+    <!-- Tela de Setup (Configurações) -->
+    <div id="screen-setup" class="screen flex flex-col items-center justify-center min-h-screen p-4 md:p-6 overflow-y-auto">
+        <div class="max-w-md w-full bg-slate-800 p-6 md:p-8 rounded-2xl border border-slate-700 shadow-2xl my-auto">
+            <h2 class="text-2xl font-bold text-center text-cyan-400 mb-6">Configurações</h2>
+            
+            <div class="space-y-5 mb-8 text-left w-full">
+                <!-- Quadro 1: Modo de Jogo -->
+                <div class="bg-slate-900 p-4 md:p-5 rounded-xl border border-slate-700">
+                    <h3 class="font-bold text-cyan-300 mb-4 uppercase tracking-wider text-xs md:text-sm">Modo de Jogo</h3>
+                    <div class="flex flex-col gap-3">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="radio" name="gameMode" value="individual" checked class="w-5 h-5 accent-cyan-500" onchange="window.app.toggleConfig()">
+                            <span class="text-slate-200 text-lg">Jogo Individual</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="radio" name="gameMode" value="grupos" class="w-5 h-5 accent-cyan-500" onchange="window.app.toggleConfig()">
+                            <span class="text-slate-200 text-lg">Criar Grupos</span>
+                        </label>
+                        
+                        <!-- Configurações de Grupo -->
+                        <div id="group-inputs-container" class="hidden mt-3 p-3 bg-slate-950 rounded-lg border border-slate-800">
+                            <label class="block text-slate-400 text-xs uppercase font-bold mb-2">Qtd. de Grupos (Proporcional a 24 cartas)</label>
+                            <select id="group-count-select" onchange="window.app.toggleGroupCount()" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-slate-200 focus:outline-none focus:border-cyan-500 text-sm mb-3 font-bold">
+                                <option value="2">2 Grupos (12 cartas/grupo)</option>
+                                <option value="3" selected>3 Grupos (8 cartas/grupo)</option>
+                                <option value="4">4 Grupos (6 cartas/grupo)</option>
+                            </select>
+                            
+                            <div class="space-y-2">
+                                <input type="text" id="g1-name" placeholder="Nome do Grupo 1" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-slate-200 text-sm focus:border-cyan-500 outline-none">
+                                <input type="text" id="g2-name" placeholder="Nome do Grupo 2" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-slate-200 text-sm focus:border-cyan-500 outline-none">
+                                <input type="text" id="g3-name" placeholder="Nome do Grupo 3" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-slate-200 text-sm focus:border-cyan-500 outline-none">
+                                <input type="text" id="g4-name" placeholder="Nome do Grupo 4" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2.5 text-slate-200 text-sm focus:border-cyan-500 outline-none" style="display: none;">
+                            </div>
+                        </div>
+                    </div>
+                </div>
 
-    <!-- Tela de Jogo (Responsiva: flex-col no celular, flex-row no PC) -->
-    <div id="screen-game" class="screen h-screen flex flex-col md:flex-row overflow-hidden">
-        
-        <!-- Sidebar Ranking (Topo no celular, Direita no Desktop) -->
-        <div class="w-full md:w-80 bg-slate-900 border-b md:border-b-0 md:border-l border-slate-700 p-3 md:p-6 flex flex-col shadow-2xl z-30 order-1 md:order-2 shrink-0 md:h-full">
-            <div class="flex justify-between items-center md:block mb-2 md:mb-6">
-                <h3 class="text-sm md:text-lg font-bold text-slate-400 uppercase tracking-wider">Ranking</h3>
-                <div class="block md:hidden text-xs text-slate-500">
-                    Restantes: <span id="cards-left-mobile" class="font-bold text-slate-300">24</span>
+                <!-- Quadro 2: Cronômetro -->
+                <div class="bg-slate-900 p-4 md:p-5 rounded-xl border border-slate-700">
+                    <h3 class="font-bold text-cyan-300 mb-4 uppercase tracking-wider text-xs md:text-sm">Cronômetro (Cartas de Problema)</h3>
+                    <div class="flex flex-col gap-3">
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="radio" name="timerConfig" value="off" checked class="w-5 h-5 accent-cyan-500" onchange="window.app.toggleConfig()">
+                            <span class="text-slate-200 text-lg">Sem Tempo</span>
+                        </label>
+                        <label class="flex items-center gap-3 cursor-pointer">
+                            <input type="radio" name="timerConfig" value="on" class="w-5 h-5 accent-cyan-500" onchange="window.app.toggleConfig()">
+                            <span class="text-slate-200 text-lg">Habilitar Cronômetro</span>
+                        </label>
+                        <div id="timer-input-container" class="hidden mt-2 p-3 bg-slate-950 rounded-lg border border-slate-800">
+                            <label class="block text-slate-400 text-xs uppercase font-bold mb-2">Segundos (Tipos 1, 2 e 3)</label>
+                            <input type="number" id="time-seconds" placeholder="Ex: 30" min="5" value="30" class="w-full bg-slate-800 border border-slate-700 rounded-lg p-2 text-slate-200 font-bold focus:outline-none focus:border-cyan-500 text-base">
+                        </div>
+                    </div>
                 </div>
             </div>
-            <!-- Lista flex-row (horizontal) no celular, flex-col (vertical) no desktop -->
-            <div id="ranking-list" class="flex flex-row md:flex-col gap-2 md:gap-4 overflow-x-auto pb-1 md:pb-0 w-full flex-1 md:flex-none">
-                <!-- Os itens do ranking serão injetados via JS -->
+
+            <button onclick="window.app.startGame()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-4 rounded-xl transition-all shadow-lg shadow-emerald-600/30 text-lg">
+                MONTAR MESA
+            </button>
+        </div>
+    </div>
+
+    <!-- Tela de Jogo -->
+    <div id="screen-game" class="screen h-screen flex flex-col md:flex-row overflow-hidden">
+        <!-- Sidebar Ranking (Ajustado overflow e wrap) -->
+        <div class="w-full md:w-80 bg-slate-900 border-b md:border-b-0 md:border-l border-slate-700 p-3 md:p-6 flex flex-col shadow-2xl z-30 order-1 md:order-2 shrink-0 md:h-full overflow-y-auto">
+            <div class="flex justify-between items-center md:block mb-3 md:mb-6">
+                <h3 id="ranking-title" class="text-sm md:text-lg font-bold text-slate-400 uppercase tracking-wider">Ranking</h3>
+                <div class="block md:hidden text-xs text-slate-500">Restantes: <span id="cards-left-mobile" class="font-bold text-slate-300">24</span></div>
             </div>
+            
+            <!-- Flex-wrap adicionado aqui para quebrar linha no mobile se não couber -->
+            <div id="ranking-list" class="flex flex-row md:flex-col flex-wrap gap-2 md:gap-4 w-full"></div>
+            
             <div class="hidden md:block mt-auto pt-4 border-t border-slate-800 text-center text-xs text-slate-500">
                 Cartas restantes no painel: <span id="cards-left" class="font-bold text-slate-300">24</span>
             </div>
@@ -65,53 +111,41 @@
             <div id="turn-indicator" class="text-xs md:text-xl font-bold text-slate-300 bg-slate-800 px-4 md:px-6 py-2 rounded-full border border-slate-700 mb-4 md:mb-6 shadow-md z-10 sticky top-2 md:top-0 transition-all">
                 Vez: <span id="current-group-name" class="text-cyan-400">...</span>
             </div>
-            
-            <!-- Grid de Cartas: 4 colunas no mobile, 6 no tablet, 8 no desktop -->
-            <div id="board-grid" class="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2 md:gap-4 w-full max-w-5xl mx-auto pb-10">
-                <!-- Os botões das 24 cartas serão injetados via JS -->
-            </div>
+            <div id="board-grid" class="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-2 md:gap-4 w-full max-w-5xl mx-auto pb-10"></div>
         </div>
     </div>
 
     <!-- Modal da Carta -->
-    <div id="card-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center hidden p-3 md:p-4 overflow-y-auto">
-        <div id="card-modal-content" class="w-full max-w-2xl w-full my-auto">
-            <!-- A carta gigante será renderizada dinamicamente aqui -->
+    <div id="card-modal" class="fixed inset-0 bg-slate-950/90 backdrop-blur-md z-50 flex items-center justify-center hidden p-6 md:p-10 overflow-y-auto">
+        <div id="card-modal-content" class="w-full max-w-3xl w-full my-auto mt-10 md:mt-auto relative">
         </div>
     </div>
 
     <!-- Tela de Vitória Final -->
     <div id="screen-victory" class="screen flex flex-col items-center justify-start min-h-screen p-4 md:p-10 overflow-y-auto w-full">
-        
+        <!-- Mantém igual o atual... -->
         <div class="text-center mb-8 md:mb-10 w-full victory-enter mt-4">
             <div class="text-5xl md:text-8xl mb-4">🏆</div>
-            <h1 class="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-600 mb-2 uppercase tracking-tight">Grupo Vencedor!</h1>
+            <h1 id="victory-title" class="text-3xl md:text-5xl font-black text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 via-yellow-400 to-yellow-600 mb-2 uppercase tracking-tight">Grupo Vencedor!</h1>
             <h2 id="winner-name" class="text-3xl md:text-6xl font-bold text-white mb-6 break-words px-4">...</h2>
             <div class="inline-block bg-yellow-900/30 border border-yellow-500/50 text-yellow-300 px-6 py-2 md:px-8 md:py-3 rounded-full text-2xl md:text-3xl font-mono font-bold shadow-[0_0_20px_rgba(234,179,8,0.3)]">
                 <span id="winner-score">0 Pts</span>
             </div>
         </div>
-
         <div class="w-full max-w-6xl victory-enter" style="animation-delay: 0.2s;">
             <h3 class="text-xl md:text-2xl font-bold text-cyan-400 mb-4 md:mb-6 text-center uppercase tracking-widest">Resumo da Partida</h3>
-            <div id="victory-tables" class="w-full flex flex-col gap-6 md:gap-8">
-                <!-- Tabelas injetadas via JS -->
-            </div>
+            <div id="victory-tables" class="w-full flex flex-col gap-6 md:gap-8"></div>
         </div>
-
         <button onclick="location.reload()" class="mt-10 mb-8 bg-cyan-700 hover:bg-cyan-600 text-white font-bold py-4 px-10 rounded-xl transition-all text-base md:text-lg shadow-lg victory-enter w-full md:w-auto" style="animation-delay: 0.4s;">
             JOGAR NOVAMENTE
         </button>
     </div>
 
-    <!-- Scripts de Dados -->
     <script src="data_cartas1.js"></script>
     <script src="data_cartas2.js"></script>
     <script src="data_cartas3.js"></script>
     <script src="data_cartas4.js"></script>
     <script src="data_cartas5.js"></script>
-    
-    <!-- Script Principal -->
     <script src="app.js"></script>
 </body>
 </html>

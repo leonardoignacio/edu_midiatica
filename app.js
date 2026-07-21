@@ -1,4 +1,9 @@
 window.app = {
+    isGroupMode: false,
+    useTimer: false,
+    timeLimit: 30,
+    timerInterval: null,
+    
     groups: [], 
     turn: 0, 
     deck: [],
@@ -10,16 +15,40 @@ window.app = {
         document.getElementById('screen-setup').classList.add('active');
     },
 
-    startGame: () => {
-        const g1 = document.getElementById('g1-name').value.trim() || 'Grupo 1';
-        const g2 = document.getElementById('g2-name').value.trim() || 'Grupo 2';
-        const g3 = document.getElementById('g3-name').value.trim() || 'Grupo 3';
+    toggleConfig: () => {
+        const mode = document.querySelector('input[name="gameMode"]:checked').value;
+        const timer = document.querySelector('input[name="timerConfig"]:checked').value;
         
-        window.app.groups = [ 
-            {name: g1, score: 0, history: []}, 
-            {name: g2, score: 0, history: []}, 
-            {name: g3, score: 0, history: []} 
-        ];
+        document.getElementById('group-inputs-container').style.display = (mode === 'grupos') ? 'block' : 'none';
+        document.getElementById('timer-input-container').style.display = (timer === 'on') ? 'block' : 'none';
+    },
+
+    toggleGroupCount: () => {
+        const count = parseInt(document.getElementById('group-count-select').value);
+        for(let i=1; i<=4; i++) {
+            const input = document.getElementById(`g${i}-name`);
+            input.style.display = (i <= count) ? 'block' : 'none';
+        }
+    },
+
+    startGame: () => {
+        const mode = document.querySelector('input[name="gameMode"]:checked').value;
+        window.app.isGroupMode = (mode === 'grupos');
+
+        const timerConfig = document.querySelector('input[name="timerConfig"]:checked').value;
+        window.app.useTimer = (timerConfig === 'on');
+        window.app.timeLimit = parseInt(document.getElementById('time-seconds').value) || 30;
+
+        if (window.app.isGroupMode) {
+            const count = parseInt(document.getElementById('group-count-select').value);
+            window.app.groups = [];
+            for (let i = 1; i <= count; i++) {
+                const name = document.getElementById(`g${i}-name`).value.trim() || `Grupo ${i}`;
+                window.app.groups.push({ name: name, score: 0, history: [] });
+            }
+        } else {
+            window.app.groups = [ {name: 'Jogador(a)', score: 0, history: []} ];
+        }
         
         document.getElementById('screen-setup').classList.remove('active');
         document.getElementById('screen-game').classList.add('active');
@@ -30,15 +59,9 @@ window.app = {
     },
 
     buildDeck: () => {
-        if (typeof cartasTipo1 === 'undefined' || typeof cartasTipo5 === 'undefined') {
-            alert("⚠️ ERRO: Os arquivos de dados (data_cartas1.js, etc.) não foram carregados.");
-            return;
-        }
-
         const getUniqueRand = (arr, numItems) => {
             const uniqueArr = [];
             const seen = new Set();
-            
             arr.forEach(item => {
                 const identifier = item.cenario || item.recorte || item.fakeNews;
                 if (!seen.has(identifier)) {
@@ -46,12 +69,10 @@ window.app = {
                     uniqueArr.push(item);
                 }
             });
-
             for (let i = uniqueArr.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [uniqueArr[i], uniqueArr[j]] = [uniqueArr[j], uniqueArr[i]];
             }
-
             return uniqueArr.slice(0, numItems);
         };
         
@@ -85,14 +106,17 @@ window.app = {
                     onclick="window.app.openCard(${index})" 
                     ${isOpened ? 'disabled' : ''}
                     class="board-card bg-slate-800 border-2 ${isOpened ? 'border-slate-800 bg-slate-900' : 'border-cyan-700 bg-gradient-to-br from-slate-700 to-slate-900 text-cyan-400 hover:text-cyan-300'} rounded-xl flex items-center justify-center shadow-lg relative overflow-hidden group">
-                    
                     ${!isOpened ? `<div class="absolute inset-0 opacity-30 group-hover:opacity-50 transition-opacity" style="background-image: ${bgPattern}"></div>` : ''}
-                    
-                    <!-- O tamanho do texto adapta-se ao celular (text-2xl) ou desktop (text-4xl) -->
-                    <span class="relative z-10 drop-shadow-md text-2xl md:text-4xl font-black">${isOpened ? '✓' : (index + 1)}</span>
+                    <span class="relative z-10 drop-shadow-md text-3xl md:text-5xl font-black">${isOpened ? '✓' : (index + 1)}</span>
                 </button>
             `;
         });
+    },
+
+    formatTime: (seconds) => {
+        const m = Math.floor(seconds / 60).toString().padStart(2, '0');
+        const s = (seconds % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
     },
 
     openCard: (index) => {
@@ -102,15 +126,24 @@ window.app = {
         
         const btn = document.getElementById(`board-card-${index}`);
         btn.disabled = true;
-        btn.innerHTML = '<span class="relative z-10 drop-shadow-md text-emerald-500 text-2xl md:text-4xl font-black">✓</span>';
+        btn.innerHTML = '<span class="relative z-10 drop-shadow-md text-emerald-500 text-3xl md:text-5xl font-black">✓</span>';
         
         const modalContent = document.getElementById('card-modal-content');
         modalContent.innerHTML = window.app.renderCardHTML(card);
-        modalContent.className = "w-full max-w-2xl w-full modal-enter";
+        modalContent.className = "w-full max-w-3xl w-full modal-enter"; // Aumentei o modal para max-w-3xl
         
         document.getElementById('card-modal').classList.remove('hidden');
         
-        // Atualiza a contagem no painel do Desktop e do Celular
+        // Controle Lógico de Tempo: 
+        // Golden (4) = Fixo 300s
+        // Problemas (1,2,3) = Respeita Config
+        // FakeNews (5) = Sem tempo
+        if (card.tipo === 4) {
+            window.app.startTimer(4, card.pontos, 300);
+        } else if (card.tipo >= 1 && card.tipo <= 3 && window.app.useTimer) {
+            window.app.startTimer(card.tipo, card.pontos, window.app.timeLimit);
+        }
+
         const remaining = window.app.cardsStatus.filter(s => !s).length;
         const deskCounter = document.getElementById('cards-left');
         const mobCounter = document.getElementById('cards-left-mobile');
@@ -118,57 +151,153 @@ window.app = {
         if (mobCounter) mobCounter.textContent = remaining;
     },
 
+    startTimer: (tipo, pontos, totalSeconds) => {
+        let timeLeft = totalSeconds;
+        const timerDisplay = document.getElementById('modal-timer-display');
+        const timerSquare = document.getElementById('timer-square');
+        if (!timerDisplay) return;
+
+        timerDisplay.textContent = window.app.formatTime(timeLeft);
+        
+        window.app.timerInterval = setInterval(() => {
+            timeLeft--;
+            timerDisplay.textContent = window.app.formatTime(timeLeft);
+            
+            if (timeLeft <= 5) {
+                timerDisplay.classList.add('timer-danger');
+                if (timerSquare) timerSquare.classList.add('border-red-500', 'shadow-[0_0_20px_rgba(239,68,68,0.5)]');
+            }
+            
+            if (timeLeft <= 0) {
+                window.app.handleTimeOut(tipo, pontos);
+            }
+        }, 1000);
+    },
+
+    handleTimeOut: (tipo, pontos) => {
+        clearInterval(window.app.timerInterval);
+        const card = window.app.currentCard;
+        const typeNames = {1: "Ed. Midiática", 2: "Mídia Recurso", 3: "Prática Docente"};
+
+        if (tipo >= 1 && tipo <= 3) {
+            // Cartas de Problema zeram a pontuação no esgotamento
+            const area = document.getElementById('options-area');
+            area.querySelectorAll('button').forEach(b => {
+                b.disabled = true;
+                if(b.getAttribute('data-correct') === 'true') {
+                    b.classList.replace('bg-slate-800', 'bg-emerald-900');
+                    b.classList.add('border-emerald-500', 'text-emerald-100');
+                }
+            });
+
+            window.app.groups[window.app.turn].history.push({
+                carta: typeNames[card.tipo] || "Problema",
+                pergunta: card.cenario,
+                pontos: 0,
+                status: '<span class="text-orange-400 font-bold">Estourou Tempo</span>'
+            });
+
+            const feedback = document.getElementById('feedback-area');
+            feedback.classList.remove('hidden');
+            document.getElementById('feedback-msg').innerHTML = "⏱️ Tempo Esgotado! <span class='text-sm text-slate-300 font-normal block mt-1'>A resposta correta está destacada em verde.</span>";
+            document.getElementById('feedback-msg').className = "text-xl md:text-2xl font-black mb-2 text-orange-400";
+            document.getElementById('btn-next').classList.replace('bg-cyan-700', 'bg-orange-600');
+
+        } else if (tipo === 4) {
+            // Carta Dourada PONTUA NORMALMENTE com 10 pts após o debate
+            document.getElementById('btn-golden-action').disabled = true;
+            window.app.groups[window.app.turn].history.push({
+                carta: "Mergulhe Fundo",
+                pergunta: card.perguntas[0],
+                pontos: 10,
+                status: '<span class="text-yellow-400 font-bold">Debate Concluído</span>'
+            });
+            
+            const msgArea = document.getElementById('debate-msg-area');
+            if (msgArea) {
+                msgArea.innerHTML = "<div class='bg-yellow-900/40 border border-yellow-500 p-4 rounded-xl mt-4 text-center animate-pulse'><p class='text-xl font-bold text-yellow-300'>⏱️ Tempo de Debate Encerrado!</p><p class='text-yellow-100'>10 Pontos garantidos para a equipe.</p></div>";
+            }
+            
+            setTimeout(() => window.app.finishTurn(10, true), 3000);
+        }
+    },
+
     renderCardHTML: (c) => {
-        if(c.tipo === 4) {
-            return `
-            <div class="card-golden rounded-2xl p-6 md:p-8 relative">
-                <div class="absolute -top-3 -right-3 md:-top-4 md:-right-4 bg-yellow-900 text-yellow-300 font-bold px-3 py-1 md:px-4 md:py-1 rounded-full shadow-lg border border-yellow-700 text-sm md:text-base">10 PONTOS</div>
-                <h2 class="text-xl md:text-2xl font-bold mb-2">Mergulhe mais fundo (Debate)</h2>
-                <div class="bg-yellow-900/10 p-3 md:p-4 rounded-lg border border-yellow-700/30 mb-4 md:mb-6 italic font-medium text-base md:text-lg leading-relaxed text-yellow-950">"${c.recorte}"</div>
-                <h3 class="font-bold uppercase tracking-wider mb-2 md:mb-3 text-sm md:text-base">Questão Norteadora:</h3>
-                <ul class="list-disc pl-5 space-y-2 md:space-y-3 mb-6 font-medium text-yellow-950 text-sm md:text-base">
-                    ${c.perguntas.map(p => `<li>${p}</li>`).join('')}
-                </ul>
-                <button onclick="window.app.finishTurn(${c.pontos})" class="w-full bg-yellow-900 hover:bg-yellow-800 text-yellow-100 font-bold py-3 md:py-2.5 rounded-xl transition-all shadow-md text-base">Proximo... (+10 Pts)</button>
+        // Constrói o HUD do Cronômetro Quadrado Flutuante
+        let timerSquareHTML = '';
+        if (c.tipo === 4) {
+            // Sempre 5 Minutos (300s) na Dourada
+            timerSquareHTML = `
+            <div id="timer-square" class="absolute -top-6 -right-3 md:-top-8 md:-right-8 w-24 h-24 md:w-32 md:h-32 bg-slate-900 border-4 border-yellow-600 rounded-2xl flex flex-col items-center justify-center shadow-2xl z-20 transform rotate-3">
+                <span class="text-[10px] md:text-xs text-yellow-500 uppercase font-black tracking-widest mb-1">Debate</span>
+                <span id="modal-timer-display" class="font-mono text-2xl md:text-4xl font-black text-yellow-400 leading-none drop-shadow-md">05:00</span>
+            </div>`;
+        } else if (c.tipo >= 1 && c.tipo <= 3 && window.app.useTimer) {
+            // Configurado pelo usuário nas Cartas de Problema
+            timerSquareHTML = `
+            <div id="timer-square" class="absolute -top-6 -right-3 md:-top-8 md:-right-8 w-24 h-24 md:w-32 md:h-32 bg-slate-950 border-4 border-cyan-700 rounded-2xl flex flex-col items-center justify-center shadow-2xl z-20 transform rotate-3">
+                <span class="text-[10px] md:text-xs text-slate-400 uppercase font-bold tracking-widest mb-1">Tempo</span>
+                <span id="modal-timer-display" class="font-mono text-2xl md:text-4xl font-black text-cyan-400 leading-none drop-shadow-md">${window.app.formatTime(window.app.timeLimit)}</span>
             </div>`;
         }
-        if(c.tipo === 5) {
+
+        if(c.tipo === 4) {
             return `
-            <div class="card-fake rounded-2xl p-6 md:p-8 relative text-center">
-                <div class="text-6xl md:text-7xl mb-4">🚨</div>
-                <h2 class="text-2xl md:text-4xl font-black mb-4 uppercase tracking-wider">Fake News</h2>
-                <p class="text-lg md:text-2xl font-medium mb-8 leading-snug">${c.fakeNews}</p>
-                <button onclick="window.app.finishTurn(${c.pontos})" class="bg-red-950 hover:bg-red-900 text-red-200 font-bold py-3 md:py-2.5 px-8 rounded-xl transition-all border border-red-800 text-base w-full shadow-md">Proximo... (-2 Pts)</button>
+            <div class="card-golden rounded-2xl p-6 md:p-10 relative mt-4">
+                <div class="absolute -top-4 -left-2 md:-left-4 bg-yellow-900 text-yellow-300 font-black px-4 py-2 md:px-6 md:py-2 rounded-full shadow-lg border-2 border-yellow-600 text-base md:text-xl z-20 uppercase tracking-wider drop-shadow-md">10 PONTOS</div>
+                ${timerSquareHTML}
+                <h2 class="text-3xl md:text-4xl font-black mb-4 text-yellow-950">Mergulhe mais fundo</h2>
+                <div class="bg-yellow-900/10 p-5 md:p-6 rounded-xl border border-yellow-700/40 mb-6 italic font-medium text-xl md:text-2xl leading-relaxed text-yellow-950 shadow-inner">"${c.recorte}"</div>
+                <h3 class="font-black uppercase tracking-wider mb-4 text-lg md:text-xl text-yellow-900">Questão Norteadora (Plenária):</h3>
+                <p class="font-bold text-yellow-950 text-2xl md:text-3xl leading-snug mb-8 bg-yellow-100 p-6 rounded-xl shadow-sm border border-yellow-400/50">
+                    ${c.perguntas[0]}
+                </p>
+                <div id="debate-msg-area"></div>
+                <button id="btn-golden-action" onclick="window.app.finishTurn(${c.pontos})" class="w-full mt-4 bg-yellow-900 hover:bg-yellow-800 text-yellow-100 font-black py-4 rounded-xl transition-all shadow-xl text-xl uppercase tracking-widest border border-yellow-700">Encerrar e Pontuar (+10 Pts)</button>
+            </div>`;
+        }
+        
+        if(c.tipo === 5) {
+            // Fake News não tem timer, mostra os pontos dinamicamente
+            return `
+            <div class="card-fake rounded-2xl p-8 md:p-12 relative text-center">
+                <div class="text-7xl md:text-9xl mb-6 drop-shadow-2xl">🚨</div>
+                <h2 class="text-4xl md:text-6xl font-black mb-6 uppercase tracking-widest text-red-400 drop-shadow-md">Fake News!</h2>
+                <p class="text-2xl md:text-4xl font-bold mb-10 leading-snug text-red-100 bg-red-950/50 p-6 rounded-2xl border border-red-800/50 shadow-inner">${c.fakeNews}</p>
+                <button id="btn-fake-action" onclick="window.app.finishTurn(${c.pontos})" class="bg-red-950 hover:bg-red-900 text-red-200 font-black py-4 px-8 rounded-xl transition-all border-2 border-red-700 text-xl md:text-2xl w-full shadow-2xl uppercase tracking-widest">Assumir o Erro (${c.pontos} Pts)</button>
             </div>`;
         }
         
         const typeNames = {1: "Cultura Digital", 2: "Mídia como Recurso", 3: "Prática Docente"};
         return `
-        <div class="card-base relative p-5 md:p-6">
-            <div class="flex flex-col sm:flex-row justify-between items-start mb-4 gap-2">
-                <span class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-cyan-500 bg-cyan-950 px-2 py-1 md:px-3 md:py-1 rounded-md border border-cyan-800">${typeNames[c.tipo]}</span>
-                <span class="font-bold text-slate-200 bg-slate-700 px-3 py-1 rounded-full border border-slate-600 text-xs md:text-sm">${c.pontos} Pts</span>
-            </div>
-            <p class="text-base md:text-xl text-slate-100 mb-6 leading-relaxed">${c.cenario}</p>
-            <div id="options-area" class="space-y-2 mb-4">
+        <div class="card-base relative p-6 md:p-10 mt-4">
+            <div class="absolute -top-4 -left-2 md:-left-4 bg-cyan-950 text-cyan-400 font-black px-4 py-2 rounded-full shadow-lg border-2 border-cyan-700 text-sm md:text-lg z-20 uppercase tracking-widest">${typeNames[c.tipo]}</div>
+            <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-slate-700 text-slate-200 font-black px-6 py-2 rounded-full shadow-lg border-2 border-slate-500 text-sm md:text-lg z-20 uppercase">${c.pontos} Pts</div>
+            ${timerSquareHTML}
+            
+            <p class="text-2xl md:text-4xl font-bold text-slate-100 mb-8 leading-snug mt-6">${c.cenario}</p>
+            
+            <div id="options-area" class="space-y-4 mb-4">
                 ${c.alternativas.map((opt) => `
-                    <button onclick="window.app.verifyAnswer(this, ${opt.correta}, ${c.pontos})" class="w-full text-left p-3 rounded-xl border border-slate-600 bg-slate-800 hover:bg-slate-700 transition-all text-sm md:text-base text-slate-300 font-medium leading-snug">
+                    <button data-correct="${opt.correta}" onclick="window.app.verifyAnswer(this, ${opt.correta}, ${c.pontos})" class="w-full text-left p-4 md:p-5 rounded-2xl border-2 border-slate-600 bg-slate-800 hover:bg-slate-700 transition-all text-lg md:text-xl text-slate-200 font-medium leading-snug shadow-md">
                         ${opt.texto}
                     </button>
                 `).join('')}
             </div>
-            <div id="feedback-area" class="hidden bg-slate-900 border border-slate-700 p-4 rounded-xl mt-4 shadow-inner">
-                <p id="feedback-msg" class="text-base font-bold mb-2"></p>
-                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 relative mt-3 md:mt-2">
-                    <span class="absolute -top-2.5 left-3 bg-slate-800 text-slate-400 text-[9px] uppercase font-bold px-2 py-0.5 rounded border border-slate-700">Fundamentação (PDF)</span>
-                    <p class="text-xs md:text-sm text-slate-300 italic leading-relaxed mt-2 md:mt-1">${c.base}</p>
+            <div id="feedback-area" class="hidden bg-slate-900 border-2 border-slate-700 p-5 rounded-2xl mt-6 shadow-inner">
+                <p id="feedback-msg" class="text-xl md:text-2xl font-black mb-3"></p>
+                <div class="bg-slate-950 p-4 md:p-5 rounded-xl border border-slate-800 relative mt-4">
+                    <span class="absolute -top-3 left-4 bg-slate-800 text-slate-400 text-[10px] md:text-xs uppercase font-black px-3 py-1 rounded-md border border-slate-600 tracking-wider">Fundamentação Pedagógica</span>
+                    <p class="text-sm md:text-base text-slate-300 italic leading-relaxed mt-2">${c.base}</p>
                 </div>
-                <button onclick="window.app.finishTurn(0)" class="mt-4 w-full bg-cyan-700 hover:bg-cyan-600 text-white font-bold py-3 md:py-2 rounded-lg transition-all text-sm md:text-base shadow-md">Proximo...</button>
+                <button id="btn-next" onclick="window.app.finishTurn(0)" class="mt-6 w-full bg-cyan-700 hover:bg-cyan-600 text-white font-black py-4 rounded-xl transition-all text-lg md:text-xl shadow-xl uppercase tracking-widest">Continuar</button>
             </div>
         </div>`;
     },
 
     verifyAnswer: (btn, isCorrect, points) => {
+        clearInterval(window.app.timerInterval); 
+        
         const area = document.getElementById('options-area');
         area.querySelectorAll('button').forEach(b => b.disabled = true);
         
@@ -182,13 +311,19 @@ window.app = {
             status: isCorrect ? '<span class="text-emerald-400 font-bold">Acertou</span>' : '<span class="text-rose-400 font-bold">Errou</span>'
         });
 
+        // Revela a Resposta Correta visualmente independente do que o usuário clicou
+        area.querySelectorAll('button').forEach(b => {
+            if(b.getAttribute('data-correct') === 'true') {
+                b.classList.replace('bg-slate-800', 'bg-emerald-900');
+                b.classList.add('border-emerald-500', 'text-emerald-100');
+            } else if (b === btn && !isCorrect) {
+                b.classList.replace('bg-slate-800', 'bg-rose-900');
+                b.classList.add('border-rose-500', 'text-rose-100');
+            }
+        });
+
         if(isCorrect) {
-            btn.classList.replace('bg-slate-800', 'bg-emerald-900');
-            btn.classList.add('border-emerald-500', 'text-emerald-100');
             window.app.groups[window.app.turn].score += points;
-        } else {
-            btn.classList.replace('bg-slate-800', 'bg-rose-900');
-            btn.classList.add('border-rose-500', 'text-rose-100');
         }
 
         const feedback = document.getElementById('feedback-area');
@@ -197,36 +332,41 @@ window.app = {
         const msgEl = document.getElementById('feedback-msg');
         if(isCorrect) {
             msgEl.textContent = "✅ Parabéns, Resposta Correta!";
-            msgEl.className = "text-base md:text-lg font-bold mb-2 text-emerald-400";
+            msgEl.className = "text-2xl md:text-3xl font-black mb-3 text-emerald-400";
         } else {
-            msgEl.textContent = "❌ Resposta Incorreta.";
-            msgEl.className = "text-base md:text-lg font-bold mb-2 text-rose-400";
+            msgEl.innerHTML = "❌ Resposta Incorreta. <span class='text-sm text-slate-300 font-normal block mt-1'>A resposta correta está destacada em verde.</span>";
+            msgEl.className = "text-2xl md:text-3xl font-black mb-3 text-rose-400";
         }
     },
 
-    finishTurn: (pointsToAdd = 0) => {
+    finishTurn: (pointsToAdd = 0, isTimeout = false) => {
+        clearInterval(window.app.timerInterval);
         const card = window.app.currentCard;
         
-        if (card.tipo === 4) {
-            window.app.groups[window.app.turn].history.push({
-                carta: "Mergulhe Fundo",
-                pergunta: card.perguntas[0],
-                pontos: 10,
-                status: '<span class="text-yellow-400 font-bold">Debateu</span>'
-            });
-        } else if (card.tipo === 5) {
-            window.app.groups[window.app.turn].history.push({
-                carta: "Fake News",
-                pergunta: card.fakeNews,
-                pontos: -2,
-                status: '<span class="text-red-500 font-bold">Penalidade</span>'
-            });
+        if (!isTimeout) {
+            if (card.tipo === 4) {
+                window.app.groups[window.app.turn].history.push({
+                    carta: "Mergulhe Fundo",
+                    pergunta: card.perguntas[0],
+                    pontos: 10,
+                    status: '<span class="text-yellow-400 font-bold">Debate Concluído</span>'
+                });
+            } else if (card.tipo === 5) {
+                window.app.groups[window.app.turn].history.push({
+                    carta: "Fake News",
+                    pergunta: card.fakeNews,
+                    pontos: card.pontos,
+                    status: '<span class="text-red-500 font-bold">Penalidade</span>'
+                });
+            }
         }
 
         window.app.groups[window.app.turn].score += pointsToAdd;
         window.app.currentCard = null; 
         
-        window.app.turn = (window.app.turn + 1) % 3;
+        if (window.app.isGroupMode) {
+            window.app.turn = (window.app.turn + 1) % window.app.groups.length;
+        }
         
         document.getElementById('card-modal').classList.add('hidden');
         document.getElementById('card-modal-content').innerHTML = '';
@@ -242,7 +382,14 @@ window.app = {
     },
 
     updateUI: () => {
-        document.getElementById('current-group-name').textContent = window.app.groups[window.app.turn].name;
+        const indicator = document.getElementById('turn-indicator');
+        if (window.app.isGroupMode) {
+            indicator.innerHTML = `Vez: <span id="current-group-name" class="text-cyan-400 text-xl md:text-2xl">${window.app.groups[window.app.turn].name}</span>`;
+            document.getElementById('ranking-title').textContent = "Ranking";
+        } else {
+            indicator.innerHTML = `<span class="text-cyan-400 text-xl md:text-2xl">Modo Individual</span>`;
+            document.getElementById('ranking-title').textContent = "Seu Placar";
+        }
         
         const ranking = document.getElementById('ranking-list');
         ranking.innerHTML = '';
@@ -250,12 +397,12 @@ window.app = {
         const sorted = [...window.app.groups].sort((a,b) => b.score - a.score);
         
         sorted.forEach(g => {
-            const isTurn = g.name === window.app.groups[window.app.turn].name;
-            // No celular vira flex-col (nome em cima, ponto em baixo) ocupando todo espaço
+            const isTurn = window.app.isGroupMode ? (g.name === window.app.groups[window.app.turn].name) : true;
+            
             ranking.innerHTML += `
-                <div class="rank-item bg-slate-800 border ${isTurn ? 'border-cyan-500 bg-slate-700 shadow-[0_0_10px_rgba(34,211,238,0.3)]' : 'border-slate-700'} p-2 md:p-4 rounded-xl flex flex-col md:flex-row justify-between items-center transition-all duration-300 flex-1 min-w-[90px]">
-                    <span class="font-bold text-xs md:text-base text-center md:text-left truncate w-full ${isTurn ? 'text-cyan-300' : 'text-slate-300'}">${g.name}</span>
-                    <span class="bg-slate-900 px-2 py-1 md:px-3 md:py-1.5 rounded-md md:rounded-lg font-mono text-cyan-400 font-bold border border-slate-700 text-sm md:text-lg mt-1 md:mt-0">${g.score}</span>
+                <div class="rank-item bg-slate-800 border ${isTurn ? 'border-cyan-500 bg-slate-700 shadow-[0_0_15px_rgba(34,211,238,0.3)] scale-105' : 'border-slate-700'} p-3 md:p-4 rounded-xl flex flex-col md:flex-row justify-between items-center transition-all duration-300 flex-1 min-w-[100px] mb-2 md:mb-0">
+                    <span class="font-bold text-sm md:text-lg text-center md:text-left truncate w-full ${isTurn ? 'text-cyan-300' : 'text-slate-300'}">${g.name}</span>
+                    <span class="bg-slate-900 px-3 py-1.5 md:px-4 md:py-2 rounded-lg font-mono text-cyan-400 font-black border border-slate-700 text-base md:text-xl mt-2 md:mt-0">${g.score}</span>
                 </div>
             `;
         });
@@ -271,7 +418,14 @@ window.app = {
         const sorted = [...window.app.groups].sort((a,b) => b.score - a.score);
         const winner = sorted[0];
         
-        document.getElementById('winner-name').textContent = winner.name;
+        if (window.app.isGroupMode) {
+            document.getElementById('victory-title').textContent = "Grupo Vencedor!";
+            document.getElementById('winner-name').textContent = winner.name;
+        } else {
+            document.getElementById('victory-title').textContent = "Desafio Concluído!";
+            document.getElementById('winner-name').textContent = "Sua Pontuação";
+        }
+        
         document.getElementById('winner-score').textContent = winner.score + " Pts";
         
         const tablesContainer = document.getElementById('victory-tables');
@@ -282,35 +436,37 @@ window.app = {
             
             let rows = g.history.map(h => `
                 <tr class="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors">
-                    <td class="p-3 md:p-4 text-xs md:text-sm text-cyan-200 align-top">${h.carta}</td>
-                    <td class="p-3 md:p-4 text-xs md:text-sm text-slate-300 align-top">${h.pergunta}</td>
-                    <td class="p-3 md:p-4 text-sm md:text-base font-mono text-slate-100 text-center align-middle">${h.pontos > 0 ? '+'+h.pontos : h.pontos}</td>
-                    <td class="p-3 md:p-4 text-xs md:text-sm text-center align-middle">${h.status}</td>
+                    <td class="p-4 md:p-5 text-sm md:text-base text-cyan-200 font-bold align-top">${h.carta}</td>
+                    <td class="p-4 md:p-5 text-sm md:text-base text-slate-200 align-top leading-relaxed">${h.pergunta}</td>
+                    <td class="p-4 md:p-5 text-base md:text-lg font-mono font-bold text-slate-100 text-center align-middle">${h.pontos > 0 ? '+'+h.pontos : h.pontos}</td>
+                    <td class="p-4 md:p-5 text-sm md:text-base text-center align-middle uppercase tracking-wider">${h.status}</td>
                 </tr>
             `).join('');
             
             if (g.history.length === 0) {
-                rows = `<tr><td colspan="4" class="p-6 text-center text-slate-500 italic text-sm">Nenhuma carta foi jogada por este grupo.</td></tr>`;
+                rows = `<tr><td colspan="4" class="p-8 text-center text-slate-500 italic text-lg">Nenhuma carta foi jogada por este jogador/grupo.</td></tr>`;
             }
 
+            const tableName = window.app.isGroupMode ? `${index + 1}º Lugar: ${g.name}` : `Histórico de Partida`;
+
             tablesContainer.innerHTML += `
-                <div class="bg-slate-800 border ${isWinner ? 'border-yellow-500/50 shadow-[0_0_20px_rgba(234,179,8,0.15)]' : 'border-slate-700'} rounded-2xl overflow-hidden">
-                    <div class="bg-slate-900/80 p-4 md:p-5 border-b ${isWinner ? 'border-yellow-500/50' : 'border-slate-700'} flex flex-col sm:flex-row justify-between items-center gap-3 md:gap-4">
-                        <h3 class="text-lg md:text-xl font-bold ${isWinner ? 'text-yellow-400' : 'text-slate-300'} text-center sm:text-left">
-                            ${index + 1}º Lugar: ${g.name}
+                <div class="bg-slate-800 border-2 ${isWinner ? 'border-yellow-500/50 shadow-[0_0_30px_rgba(234,179,8,0.2)]' : 'border-slate-700'} rounded-3xl overflow-hidden">
+                    <div class="bg-slate-900/80 p-5 md:p-6 border-b ${isWinner ? 'border-yellow-500/50' : 'border-slate-700'} flex flex-col sm:flex-row justify-between items-center gap-4">
+                        <h3 class="text-xl md:text-2xl font-black ${isWinner ? 'text-yellow-400' : 'text-slate-300'} text-center sm:text-left uppercase tracking-widest">
+                            ${tableName}
                         </h3>
-                        <span class="bg-slate-950 px-3 py-1.5 md:px-4 md:py-2 rounded-lg font-mono text-cyan-400 font-bold border border-slate-700 text-base md:text-lg">
-                            Pontuação Final: ${g.score}
+                        <span class="bg-slate-950 px-5 py-2 md:px-6 md:py-3 rounded-xl font-mono text-cyan-400 font-black border border-slate-700 text-lg md:text-2xl">
+                            Final: ${g.score}
                         </span>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse min-w-[500px] md:min-w-[600px]">
+                        <table class="w-full text-left border-collapse min-w-[600px] md:min-w-[800px]">
                             <thead>
-                                <tr class="bg-slate-900/60 text-slate-400 text-[10px] md:text-xs uppercase tracking-wider">
-                                    <th class="p-3 md:p-4 font-semibold w-1/4 md:w-1/5">Tipo de Carta</th>
-                                    <th class="p-3 md:p-4 font-semibold w-2/5">Pergunta / Cenário Enfrentado</th>
-                                    <th class="p-3 md:p-4 font-semibold w-1/6 text-center">Pontos</th>
-                                    <th class="p-3 md:p-4 font-semibold w-1/6 text-center">Resultado</th>
+                                <tr class="bg-slate-900/60 text-slate-400 text-xs md:text-sm uppercase tracking-widest font-black">
+                                    <th class="p-5 w-1/5">Tipo de Carta</th>
+                                    <th class="p-5 w-2/5">Cenário Enfrentado</th>
+                                    <th class="p-5 w-1/6 text-center">Pontos</th>
+                                    <th class="p-5 w-1/6 text-center">Resultado</th>
                                 </tr>
                             </thead>
                             <tbody>
