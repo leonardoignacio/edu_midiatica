@@ -3,7 +3,7 @@ window.app = {
     turn: 0, 
     deck: [],
     cardsStatus: [],
-    currentCard: null, // Guarda a carta atual para facilitar o registro no histórico
+    currentCard: null,
     
     showSetup: () => {
         document.getElementById('screen-intro').classList.remove('active');
@@ -15,7 +15,6 @@ window.app = {
         const g2 = document.getElementById('g2-name').value.trim() || 'Grupo 2';
         const g3 = document.getElementById('g3-name').value.trim() || 'Grupo 3';
         
-        // Inicializa os grupos com o array de histórico vazio
         window.app.groups = [ 
             {name: g1, score: 0, history: []}, 
             {name: g2, score: 0, history: []}, 
@@ -85,11 +84,12 @@ window.app = {
                     id="board-card-${index}"
                     onclick="window.app.openCard(${index})" 
                     ${isOpened ? 'disabled' : ''}
-                    class="board-card bg-slate-800 border-2 ${isOpened ? 'border-slate-800 bg-slate-900' : 'border-cyan-700 bg-gradient-to-br from-slate-700 to-slate-900 text-cyan-400 hover:text-cyan-300'} rounded-xl flex items-center justify-center text-4xl font-black shadow-lg relative overflow-hidden group">
+                    class="board-card bg-slate-800 border-2 ${isOpened ? 'border-slate-800 bg-slate-900' : 'border-cyan-700 bg-gradient-to-br from-slate-700 to-slate-900 text-cyan-400 hover:text-cyan-300'} rounded-xl flex items-center justify-center shadow-lg relative overflow-hidden group">
                     
                     ${!isOpened ? `<div class="absolute inset-0 opacity-30 group-hover:opacity-50 transition-opacity" style="background-image: ${bgPattern}"></div>` : ''}
                     
-                    <span class="relative z-10 drop-shadow-md">${isOpened ? '✓' : (index + 1)}</span>
+                    <!-- O tamanho do texto adapta-se ao celular (text-2xl) ou desktop (text-4xl) -->
+                    <span class="relative z-10 drop-shadow-md text-2xl md:text-4xl font-black">${isOpened ? '✓' : (index + 1)}</span>
                 </button>
             `;
         });
@@ -97,12 +97,12 @@ window.app = {
 
     openCard: (index) => {
         const card = window.app.deck[index];
-        window.app.currentCard = card; // Salva a carta do turno atual
+        window.app.currentCard = card; 
         window.app.cardsStatus[index] = true; 
         
         const btn = document.getElementById(`board-card-${index}`);
         btn.disabled = true;
-        btn.innerHTML = '<span class="relative z-10 drop-shadow-md text-emerald-500">✓</span>';
+        btn.innerHTML = '<span class="relative z-10 drop-shadow-md text-emerald-500 text-2xl md:text-4xl font-black">✓</span>';
         
         const modalContent = document.getElementById('card-modal-content');
         modalContent.innerHTML = window.app.renderCardHTML(card);
@@ -110,56 +110,60 @@ window.app = {
         
         document.getElementById('card-modal').classList.remove('hidden');
         
+        // Atualiza a contagem no painel do Desktop e do Celular
         const remaining = window.app.cardsStatus.filter(s => !s).length;
-        document.getElementById('cards-left').textContent = remaining;
+        const deskCounter = document.getElementById('cards-left');
+        const mobCounter = document.getElementById('cards-left-mobile');
+        if (deskCounter) deskCounter.textContent = remaining;
+        if (mobCounter) mobCounter.textContent = remaining;
     },
 
     renderCardHTML: (c) => {
         if(c.tipo === 4) {
             return `
             <div class="card-golden rounded-2xl p-6 md:p-8 relative">
-                <div class="absolute -top-4 -right-4 bg-yellow-900 text-yellow-300 font-bold px-4 py-1 rounded-full shadow-lg border border-yellow-700">10 PONTOS</div>
+                <div class="absolute -top-3 -right-3 md:-top-4 md:-right-4 bg-yellow-900 text-yellow-300 font-bold px-3 py-1 md:px-4 md:py-1 rounded-full shadow-lg border border-yellow-700 text-sm md:text-base">10 PONTOS</div>
                 <h2 class="text-xl md:text-2xl font-bold mb-2">Mergulhe mais fundo (Debate)</h2>
-                <div class="bg-yellow-900/10 p-3 md:p-4 rounded-lg border border-yellow-700/30 mb-4 md:mb-6 italic font-medium text-base md:text-lg leading-relaxed">"${c.recorte}"</div>
+                <div class="bg-yellow-900/10 p-3 md:p-4 rounded-lg border border-yellow-700/30 mb-4 md:mb-6 italic font-medium text-base md:text-lg leading-relaxed text-yellow-950">"${c.recorte}"</div>
                 <h3 class="font-bold uppercase tracking-wider mb-2 md:mb-3 text-sm md:text-base">Questão Norteadora:</h3>
                 <ul class="list-disc pl-5 space-y-2 md:space-y-3 mb-6 font-medium text-yellow-950 text-sm md:text-base">
                     ${c.perguntas.map(p => `<li>${p}</li>`).join('')}
                 </ul>
-                <button onclick="window.app.finishTurn(${c.pontos})" class="w-full bg-yellow-900 hover:bg-yellow-800 text-yellow-100 font-bold py-2.5 rounded-xl transition-all shadow-md text-base">Proximo... (+10 Pts)</button>
+                <button onclick="window.app.finishTurn(${c.pontos})" class="w-full bg-yellow-900 hover:bg-yellow-800 text-yellow-100 font-bold py-3 md:py-2.5 rounded-xl transition-all shadow-md text-base">Proximo... (+10 Pts)</button>
             </div>`;
         }
         if(c.tipo === 5) {
             return `
             <div class="card-fake rounded-2xl p-6 md:p-8 relative text-center">
                 <div class="text-6xl md:text-7xl mb-4">🚨</div>
-                <h2 class="text-3xl md:text-4xl font-black mb-4 uppercase tracking-wider">Fake News</h2>
-                <p class="text-xl md:text-2xl font-medium mb-8 leading-snug">${c.fakeNews}</p>
-                <button onclick="window.app.finishTurn(${c.pontos})" class="bg-red-950 hover:bg-red-900 text-red-200 font-bold py-2.5 px-8 rounded-xl transition-all border border-red-800 text-base w-full shadow-md">Proximo... (-2 Pts)</button>
+                <h2 class="text-2xl md:text-4xl font-black mb-4 uppercase tracking-wider">Fake News</h2>
+                <p class="text-lg md:text-2xl font-medium mb-8 leading-snug">${c.fakeNews}</p>
+                <button onclick="window.app.finishTurn(${c.pontos})" class="bg-red-950 hover:bg-red-900 text-red-200 font-bold py-3 md:py-2.5 px-8 rounded-xl transition-all border border-red-800 text-base w-full shadow-md">Proximo... (-2 Pts)</button>
             </div>`;
         }
         
         const typeNames = {1: "Cultura Digital", 2: "Mídia como Recurso", 3: "Prática Docente"};
         return `
-        <div class="card-base relative p-6">
-            <div class="flex justify-between items-start mb-4">
-                <span class="text-xs font-bold uppercase tracking-widest text-cyan-500 bg-cyan-950 px-3 py-1 rounded-md border border-cyan-800">${typeNames[c.tipo]}</span>
-                <span class="font-bold text-slate-200 bg-slate-700 px-3 py-1 rounded-full border border-slate-600 text-sm">${c.pontos} Pts</span>
+        <div class="card-base relative p-5 md:p-6">
+            <div class="flex flex-col sm:flex-row justify-between items-start mb-4 gap-2">
+                <span class="text-[10px] md:text-xs font-bold uppercase tracking-widest text-cyan-500 bg-cyan-950 px-2 py-1 md:px-3 md:py-1 rounded-md border border-cyan-800">${typeNames[c.tipo]}</span>
+                <span class="font-bold text-slate-200 bg-slate-700 px-3 py-1 rounded-full border border-slate-600 text-xs md:text-sm">${c.pontos} Pts</span>
             </div>
-            <p class="text-lg md:text-xl text-slate-100 mb-6 leading-relaxed">${c.cenario}</p>
+            <p class="text-base md:text-xl text-slate-100 mb-6 leading-relaxed">${c.cenario}</p>
             <div id="options-area" class="space-y-2 mb-4">
                 ${c.alternativas.map((opt) => `
-                    <button onclick="window.app.verifyAnswer(this, ${opt.correta}, ${c.pontos})" class="w-full text-left p-3 rounded-xl border border-slate-600 bg-slate-800 hover:bg-slate-700 transition-all text-sm md:text-base text-slate-300 font-medium">
+                    <button onclick="window.app.verifyAnswer(this, ${opt.correta}, ${c.pontos})" class="w-full text-left p-3 rounded-xl border border-slate-600 bg-slate-800 hover:bg-slate-700 transition-all text-sm md:text-base text-slate-300 font-medium leading-snug">
                         ${opt.texto}
                     </button>
                 `).join('')}
             </div>
             <div id="feedback-area" class="hidden bg-slate-900 border border-slate-700 p-4 rounded-xl mt-4 shadow-inner">
                 <p id="feedback-msg" class="text-base font-bold mb-2"></p>
-                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 relative">
-                    <span class="absolute -top-2.5 left-3 bg-slate-800 text-slate-400 text-[10px] uppercase font-bold px-2 py-0.5 rounded border border-slate-700">Fundamentação (PDF)</span>
-                    <p class="text-xs md:text-sm text-slate-300 italic leading-relaxed mt-1">${c.base}</p>
+                <div class="bg-slate-950 p-3 rounded-lg border border-slate-800 relative mt-3 md:mt-2">
+                    <span class="absolute -top-2.5 left-3 bg-slate-800 text-slate-400 text-[9px] uppercase font-bold px-2 py-0.5 rounded border border-slate-700">Fundamentação (PDF)</span>
+                    <p class="text-xs md:text-sm text-slate-300 italic leading-relaxed mt-2 md:mt-1">${c.base}</p>
                 </div>
-                <button onclick="window.app.finishTurn(0)" class="mt-4 w-full bg-cyan-700 hover:bg-cyan-600 text-white font-bold py-2 rounded-lg transition-all text-sm shadow-md">Proximo...</button>
+                <button onclick="window.app.finishTurn(0)" class="mt-4 w-full bg-cyan-700 hover:bg-cyan-600 text-white font-bold py-3 md:py-2 rounded-lg transition-all text-sm md:text-base shadow-md">Proximo...</button>
             </div>
         </div>`;
     },
@@ -168,7 +172,6 @@ window.app = {
         const area = document.getElementById('options-area');
         area.querySelectorAll('button').forEach(b => b.disabled = true);
         
-        // Registra a resposta no histórico do Grupo
         const card = window.app.currentCard;
         const typeNames = {1: "Ed. Midiática", 2: "Mídia como Recurso", 3: "Prática Docente"};
         
@@ -179,7 +182,6 @@ window.app = {
             status: isCorrect ? '<span class="text-emerald-400 font-bold">Acertou</span>' : '<span class="text-rose-400 font-bold">Errou</span>'
         });
 
-        // Feedback Visual
         if(isCorrect) {
             btn.classList.replace('bg-slate-800', 'bg-emerald-900');
             btn.classList.add('border-emerald-500', 'text-emerald-100');
@@ -205,10 +207,9 @@ window.app = {
     finishTurn: (pointsToAdd = 0) => {
         const card = window.app.currentCard;
         
-        // Registra o histórico caso a carta seja direta (Sem alternativas)
         if (card.tipo === 4) {
             window.app.groups[window.app.turn].history.push({
-                carta: "Mergulhe Fundo (Dourada)",
+                carta: "Mergulhe Fundo",
                 pergunta: card.perguntas[0],
                 pontos: 10,
                 status: '<span class="text-yellow-400 font-bold">Debateu</span>'
@@ -223,7 +224,7 @@ window.app = {
         }
 
         window.app.groups[window.app.turn].score += pointsToAdd;
-        window.app.currentCard = null; // Limpa a memória da carta do turno
+        window.app.currentCard = null; 
         
         window.app.turn = (window.app.turn + 1) % 3;
         
@@ -232,7 +233,6 @@ window.app = {
         
         window.app.updateUI();
 
-        // Verifica o Fim de Jogo
         const remaining = window.app.cardsStatus.filter(s => !s).length;
         if (remaining === 0) {
             setTimeout(() => {
@@ -251,10 +251,11 @@ window.app = {
         
         sorted.forEach(g => {
             const isTurn = g.name === window.app.groups[window.app.turn].name;
+            // No celular vira flex-col (nome em cima, ponto em baixo) ocupando todo espaço
             ranking.innerHTML += `
-                <div class="rank-item bg-slate-800 border ${isTurn ? 'border-cyan-500 bg-slate-700 shadow-[0_0_15px_rgba(34,211,238,0.2)]' : 'border-slate-700'} p-4 rounded-xl flex justify-between items-center transition-all duration-300">
-                    <span class="font-bold ${isTurn ? 'text-cyan-300' : 'text-slate-300'}">${g.name}</span>
-                    <span class="bg-slate-900 px-3 py-1.5 rounded-lg font-mono text-cyan-400 font-bold border border-slate-700 text-lg">${g.score}</span>
+                <div class="rank-item bg-slate-800 border ${isTurn ? 'border-cyan-500 bg-slate-700 shadow-[0_0_10px_rgba(34,211,238,0.3)]' : 'border-slate-700'} p-2 md:p-4 rounded-xl flex flex-col md:flex-row justify-between items-center transition-all duration-300 flex-1 min-w-[90px]">
+                    <span class="font-bold text-xs md:text-base text-center md:text-left truncate w-full ${isTurn ? 'text-cyan-300' : 'text-slate-300'}">${g.name}</span>
+                    <span class="bg-slate-900 px-2 py-1 md:px-3 md:py-1.5 rounded-md md:rounded-lg font-mono text-cyan-400 font-bold border border-slate-700 text-sm md:text-lg mt-1 md:mt-0">${g.score}</span>
                 </div>
             `;
         });
@@ -262,19 +263,17 @@ window.app = {
 
     showVictory: () => {
         document.getElementById('screen-game').classList.remove('active');
-        document.body.style.overflow = 'auto'; // Habilita rolagem para ver a tabela longa
+        document.body.style.overflow = 'auto'; 
         
         const victoryScreen = document.getElementById('screen-victory');
         victoryScreen.classList.add('active');
         
-        // Determina o Vencedor
         const sorted = [...window.app.groups].sort((a,b) => b.score - a.score);
         const winner = sorted[0];
         
         document.getElementById('winner-name').textContent = winner.name;
         document.getElementById('winner-score').textContent = winner.score + " Pts";
         
-        // Monta as Tabelas
         const tablesContainer = document.getElementById('victory-tables');
         tablesContainer.innerHTML = '';
         
@@ -283,35 +282,35 @@ window.app = {
             
             let rows = g.history.map(h => `
                 <tr class="border-b border-slate-700/50 hover:bg-slate-700/30 transition-colors">
-                    <td class="p-4 text-sm text-cyan-200 align-top">${h.carta}</td>
-                    <td class="p-4 text-sm text-slate-300 align-top">${h.pergunta}</td>
-                    <td class="p-4 text-base font-mono text-slate-100 text-center align-middle">${h.pontos > 0 ? '+'+h.pontos : h.pontos}</td>
-                    <td class="p-4 text-sm text-center align-middle">${h.status}</td>
+                    <td class="p-3 md:p-4 text-xs md:text-sm text-cyan-200 align-top">${h.carta}</td>
+                    <td class="p-3 md:p-4 text-xs md:text-sm text-slate-300 align-top">${h.pergunta}</td>
+                    <td class="p-3 md:p-4 text-sm md:text-base font-mono text-slate-100 text-center align-middle">${h.pontos > 0 ? '+'+h.pontos : h.pontos}</td>
+                    <td class="p-3 md:p-4 text-xs md:text-sm text-center align-middle">${h.status}</td>
                 </tr>
             `).join('');
             
             if (g.history.length === 0) {
-                rows = `<tr><td colspan="4" class="p-6 text-center text-slate-500 italic">Nenhuma carta foi jogada por este grupo.</td></tr>`;
+                rows = `<tr><td colspan="4" class="p-6 text-center text-slate-500 italic text-sm">Nenhuma carta foi jogada por este grupo.</td></tr>`;
             }
 
             tablesContainer.innerHTML += `
                 <div class="bg-slate-800 border ${isWinner ? 'border-yellow-500/50 shadow-[0_0_20px_rgba(234,179,8,0.15)]' : 'border-slate-700'} rounded-2xl overflow-hidden">
-                    <div class="bg-slate-900/80 p-5 border-b ${isWinner ? 'border-yellow-500/50' : 'border-slate-700'} flex flex-col md:flex-row justify-between items-center gap-4">
-                        <h3 class="text-xl font-bold ${isWinner ? 'text-yellow-400' : 'text-slate-300'}">
+                    <div class="bg-slate-900/80 p-4 md:p-5 border-b ${isWinner ? 'border-yellow-500/50' : 'border-slate-700'} flex flex-col sm:flex-row justify-between items-center gap-3 md:gap-4">
+                        <h3 class="text-lg md:text-xl font-bold ${isWinner ? 'text-yellow-400' : 'text-slate-300'} text-center sm:text-left">
                             ${index + 1}º Lugar: ${g.name}
                         </h3>
-                        <span class="bg-slate-950 px-4 py-2 rounded-lg font-mono text-cyan-400 font-bold border border-slate-700 text-lg">
+                        <span class="bg-slate-950 px-3 py-1.5 md:px-4 md:py-2 rounded-lg font-mono text-cyan-400 font-bold border border-slate-700 text-base md:text-lg">
                             Pontuação Final: ${g.score}
                         </span>
                     </div>
                     <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse min-w-[600px]">
+                        <table class="w-full text-left border-collapse min-w-[500px] md:min-w-[600px]">
                             <thead>
-                                <tr class="bg-slate-900/60 text-slate-400 text-xs uppercase tracking-wider">
-                                    <th class="p-4 font-semibold w-1/5">Tipo de Carta</th>
-                                    <th class="p-4 font-semibold w-2/5">Pergunta / Cenário Enfrentado</th>
-                                    <th class="p-4 font-semibold w-1/6 text-center">Pontos</th>
-                                    <th class="p-4 font-semibold w-1/6 text-center">Resultado</th>
+                                <tr class="bg-slate-900/60 text-slate-400 text-[10px] md:text-xs uppercase tracking-wider">
+                                    <th class="p-3 md:p-4 font-semibold w-1/4 md:w-1/5">Tipo de Carta</th>
+                                    <th class="p-3 md:p-4 font-semibold w-2/5">Pergunta / Cenário Enfrentado</th>
+                                    <th class="p-3 md:p-4 font-semibold w-1/6 text-center">Pontos</th>
+                                    <th class="p-3 md:p-4 font-semibold w-1/6 text-center">Resultado</th>
                                 </tr>
                             </thead>
                             <tbody>
