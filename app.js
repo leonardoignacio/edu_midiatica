@@ -15,6 +15,93 @@ window.app = {
         document.getElementById('screen-setup').classList.add('active');
     },
 
+    backToMenuFromSetup: () => {
+        document.getElementById('screen-setup').classList.remove('active');
+        document.getElementById('screen-intro').classList.add('active');
+    },
+
+    // ==========================================================
+    // NOVA FEATURE: MODO ESTUDAR 
+    // ==========================================================
+    startStudyMode: () => {
+        // Transição de telas
+        document.getElementById('screen-intro').classList.remove('active');
+        document.getElementById('screen-estudar').classList.add('active');
+
+        // Unificar as cartas
+        const todasAsCartas = [
+            ...cartasTipo1, 
+            ...cartasTipo2, 
+            ...cartasTipo3, 
+            ...cartasTipo4, 
+            ...cartasTipo5
+        ];
+
+        let htmlContent = '';
+        const typeNames = {1: "Ed. Midiática", 2: "Mídia como Recurso", 3: "Prática Docente", 4: "Mergulhe Fundo (Dourada)", 5: "Fake News"};
+        const typeColors = {
+            1: "text-cyan-400 border-cyan-700 bg-cyan-950/30",
+            2: "text-purple-400 border-purple-700 bg-purple-950/30",
+            3: "text-emerald-400 border-emerald-700 bg-emerald-950/30",
+            4: "text-yellow-400 border-yellow-600 bg-yellow-950/30",
+            5: "text-red-400 border-red-700 bg-red-950/30"
+        };
+
+        todasAsCartas.forEach((c, index) => {
+            const colorConfig = typeColors[c.tipo] || "text-slate-400 border-slate-700 bg-slate-900";
+            const typeName = typeNames[c.tipo] || `Tipo ${c.tipo}`;
+            const colorClasses = colorConfig.split(' '); // [text, border, bg]
+            
+            let conteudo = c.cenario || c.recorte || c.fakeNews;
+            let feedbackHtml = '';
+
+            // Renderiza o gabarito de acordo com o tipo
+            if (c.alternativas) {
+                const correta = c.alternativas.find(a => a.correta).texto;
+                feedbackHtml = `
+                    <div class="mt-5 pt-4 border-t border-slate-700">
+                        <p class="text-emerald-400 font-bold text-sm mb-2"><i class="fa-solid fa-check-circle mr-1"></i> Resposta Correta: <span class="font-normal text-slate-200">${correta}</span></p>
+                        <p class="text-slate-400 text-sm leading-relaxed"><strong class="text-slate-300">Base Teórica:</strong> ${c.base}</p>
+                    </div>
+                `;
+            } else if (c.perguntas) {
+                feedbackHtml = `
+                    <div class="mt-5 pt-4 border-t border-yellow-700/50">
+                        <p class="text-yellow-400 font-bold text-sm mb-2"><i class="fa-solid fa-lightbulb mr-1"></i> Questão para Reflexão:</p>
+                        <p class="text-yellow-100/80 text-sm leading-relaxed">${c.perguntas[0]}</p>
+                    </div>
+                `;
+            } else if (c.fakeNews) {
+                feedbackHtml = `
+                    <div class="mt-5 pt-4 border-t border-red-800/50">
+                        <p class="text-red-400 font-bold text-sm"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Penalidade: ${c.pontos} pontos.</p>
+                    </div>
+                `;
+            }
+
+            htmlContent += `
+                <div class="bg-slate-800 border-2 ${colorClasses[1]} rounded-xl p-5 md:p-6 shadow-lg flex flex-col hover:shadow-2xl transition-shadow">
+                    <div class="flex justify-between items-center mb-4 border-b border-slate-700 pb-3">
+                        <span class="text-xs font-black text-slate-500 uppercase tracking-widest">Carta ${index + 1}</span>
+                        <span class="text-xs font-black uppercase tracking-widest ${colorClasses[0]} px-3 py-1 ${colorClasses[2]} rounded-full border ${colorClasses[1]}">${typeName}</span>
+                    </div>
+                    <p class="text-slate-100 text-base md:text-lg leading-relaxed text-justify">${conteudo}</p>
+                    ${feedbackHtml}
+                </div>
+            `;
+        });
+
+        document.getElementById('study-list').innerHTML = htmlContent;
+    },
+
+    backToMenu: () => {
+        document.getElementById('screen-estudar').classList.remove('active');
+        document.getElementById('screen-intro').classList.add('active');
+        // Limpa a memória do DOM da lista para não acumular
+        document.getElementById('study-list').innerHTML = ''; 
+    },
+    // ==========================================================
+
     toggleConfig: () => {
         const mode = document.querySelector('input[name="gameMode"]:checked').value;
         const timer = document.querySelector('input[name="timerConfig"]:checked').value;
@@ -217,7 +304,6 @@ window.app = {
     },
 
     renderCardHTML: (c) => {
-        // Híbrido: Barra horizontal no Mobile (relative + flex-row), Quadrado no Desktop (absolute + flex-col)
         let timerSquareHTML = '';
         if (c.tipo === 4) {
             timerSquareHTML = `
