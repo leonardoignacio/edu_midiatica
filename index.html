@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cultura Digital em Jogo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body class="bg-slate-900 text-slate-100 min-h-screen font-sans overflow-hidden">
+
+    <!-- Tela Inicial -->
+    <div id="screen-intro" class="screen active flex flex-col items-center justify-center min-h-screen p-6">
+        <div class="max-w-2xl text-center bg-slate-800 p-8 rounded-2xl border border-slate-700 shadow-2xl">
+            <h1 class="text-4xl font-bold text-cyan-400 mb-4">Cultura Digital em Jogo</h1>
+            <p class="text-slate-300 mb-6 text-lg">Um jogo de cartas sobre Educação Midiática e metodologias ativas. Debata, analise informações e guie sua equipe na construção da autonomia digital.</p>
+            <ul class="text-left text-slate-400 mb-8 space-y-2 text-sm bg-slate-900 p-4 rounded-lg">
+                <li>💡 <strong>Tipos 1 a 3:</strong> Situações-problema (1 a 5 pontos). Acerte para pontuar.</li>
+                <li>🌟 <strong>Tipo 4 (Dourada):</strong> Carta de debate (10 pontos). Discuta em plenária.</li>
+                <li>🚨 <strong>Tipo 5 (Fake News):</strong> Penalidade automática (-2 pontos).</li>
+            </ul>
+            <button onclick="window.app.showSetup()" class="bg-cyan-600 hover:bg-cyan-500 text-white font-bold py-3 px-8 rounded-full transition-all transform hover:scale-105 shadow-lg shadow-cyan-500/30">
+                JOGAR
+            </button>
+        </div>
+    </div>
+
+    <!-- Tela de Setup -->
+    <div id="screen-setup" class="screen flex flex-col items-center justify-center min-h-screen p-6">
+        <div class="max-w-md w-full bg-slate-800 p-8 rounded-2xl border border-slate-700 shadow-2xl">
+            <h2 class="text-2xl font-bold text-center text-cyan-400 mb-6">Cadastrar Grupos</h2>
+            <div class="space-y-4 mb-8">
+                <input type="text" id="g1-name" placeholder="Nome do Grupo 1" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-slate-200 focus:outline-none focus:border-cyan-500">
+                <input type="text" id="g2-name" placeholder="Nome do Grupo 2" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-slate-200 focus:outline-none focus:border-cyan-500">
+                <input type="text" id="g3-name" placeholder="Nome do Grupo 3" class="w-full bg-slate-900 border border-slate-700 rounded-lg p-3 text-slate-200 focus:outline-none focus:border-cyan-500">
+            </div>
+            <button onclick="window.app.startGame()" class="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-bold py-3 rounded-lg transition-all shadow-lg shadow-emerald-600/30">
+                INICIAR PARTIDA
+            </button>
+        </div>
+    </div>
+
+    <!-- Tela de Jogo -->
+    <div id="screen-game" class="screen h-screen flex">
+        
+        <!-- Área Principal (Tabuleiro) -->
+        <div class="flex-1 flex flex-col p-6 items-center relative overflow-y-auto overflow-x-hidden">
+            <div id="turn-indicator" class="text-xl font-bold text-slate-300 bg-slate-800 px-6 py-2 rounded-full border border-slate-700 mb-6 shadow-md z-10 sticky top-0">
+                Vez do Grupo: <span id="current-group-name" class="text-cyan-400">...</span>
+            </div>
+            
+            <!-- Grid de Cartas (Painel) -->
+            <div id="board-grid" class="grid grid-cols-4 md:grid-cols-6 lg:grid-cols-8 gap-4 w-full max-w-5xl mx-auto pb-10">
+                <!-- Os botões das 24 cartas serão injetados via JS -->
+            </div>
+        </div>
+
+        <!-- Sidebar Ranking -->
+        <div class="w-80 bg-slate-900 border-l border-slate-700 p-6 flex flex-col shadow-2xl z-20 relative">
+            <h3 class="text-lg font-bold text-slate-400 mb-6 uppercase tracking-wider text-center">Ranking</h3>
+            <div id="ranking-list" class="flex flex-col gap-4 flex-1">
+                <!-- Os itens do ranking serão injetados via JS -->
+            </div>
+            <div class="mt-auto pt-4 border-t border-slate-800 text-center text-xs text-slate-500">
+                Cartas restantes no painel: <span id="cards-left" class="font-bold text-slate-300">24</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal da Carta (Aparece quando uma carta é clicada) -->
+    <div id="card-modal" class="fixed inset-0 bg-slate-950/85 backdrop-blur-sm z-50 flex items-center justify-center hidden p-4">
+        <div id="card-modal-content" class="w-full max-w-2xl w-full">
+            <!-- A carta gigante será renderizada dinamicamente aqui -->
+        </div>
+    </div>
+
+    <!-- Scripts de Dados -->
+    <script src="data_cartas1.js"></script>
+    <script src="data_cartas2.js"></script>
+    <script src="data_cartas3.js"></script>
+    <script src="data_cartas4.js"></script>
+    <script src="data_cartas5.js"></script>
+    
+    <!-- Script Principal -->
+    <script src="app.js"></script>
+</body>
+</html>
