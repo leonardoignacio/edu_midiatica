@@ -106,8 +106,10 @@ window.app = {
                     </div>
                 `;
             } else if (c.fakeNews) {
+                // AQUI FOI INJETADA A NOVA BASE TEÓRICA ANTES DOS PONTOS (MODO ESTUDO)
                 feedbackHtml = `
                     <div class="pt-4 border-t border-red-800/50">
+                        <p class="text-red-300 font-medium text-sm mb-3"><i class="fa-solid fa-book-open mr-1"></i> ${c.base}</p>
                         <p class="text-red-400 font-bold text-sm"><i class="fa-solid fa-triangle-exclamation mr-1"></i> Penalidade: ${c.pontos} pontos.</p>
                     </div>
                 `;
@@ -349,7 +351,6 @@ window.app = {
         let timerSquareHTML = '';
         
         // Lógica dinâmica para a posição da Tag de Pontos. 
-        // Se o cronômetro estiver ligado, no Desktop ela desce (top-28) para ficar abaixo do relógio.
         const badgePontosPos = window.app.useTimer 
             ? "absolute -top-4 right-4 md:top-28 md:-right-4" 
             : "absolute -top-4 right-4 md:-right-4";
@@ -394,7 +395,11 @@ window.app = {
             <div class="card-fake rounded-2xl p-6 md:p-12 relative text-center mt-6 md:mt-4">
                 <div class="text-7xl md:text-9xl mb-6 drop-shadow-2xl">🚨</div>
                 <h2 class="text-4xl md:text-6xl font-black mb-6 uppercase tracking-widest text-red-400 drop-shadow-md">Fake News!</h2>
-                <p class="text-2xl md:text-4xl font-bold mb-10 leading-snug text-red-100 bg-red-950/50 p-6 rounded-2xl border border-red-800/50 shadow-inner">${c.fakeNews}</p>
+                <p class="text-2xl md:text-4xl font-bold mb-4 leading-snug text-red-100 bg-red-950/50 p-6 rounded-2xl border border-red-800/50 shadow-inner">${c.fakeNews}</p>
+                
+                <!-- AQUI FOI INJETADA A NOVA BASE TEÓRICA NA CARTA DO MODO JOGO -->
+                <p class="text-lg md:text-xl text-red-300 font-medium mb-10 italic">${c.base}</p>
+                
                 <button id="btn-fake-action" onclick="window.app.finishTurn(${c.pontos})" class="bg-red-950 hover:bg-red-900 text-red-200 font-black py-4 px-8 rounded-xl transition-all border-2 border-red-700 text-xl md:text-2xl w-full shadow-2xl uppercase tracking-widest">Assumir o Erro (${c.pontos} Pts)</button>
             </div>`;
         }
@@ -404,12 +409,11 @@ window.app = {
         <div class="card-base relative p-5 md:p-10 mt-6 md:mt-4">
             <div class="absolute -top-4 left-4 md:-left-4 bg-cyan-950 text-cyan-400 font-black px-3 md:px-4 py-1 md:py-2 rounded-full shadow-lg border-2 border-cyan-700 text-xs md:text-lg z-20 uppercase tracking-widest">${typeNames[c.tipo]}</div>
             
-            <!-- CAIXA DE PONTOS COM POSICIONAMENTO CONDICIONAL NO DESKTOP -->
             <div class="${badgePontosPos} bg-slate-700 text-slate-200 font-black px-4 md:px-6 py-1 md:py-2 rounded-full shadow-lg border-2 border-slate-500 text-xs md:text-lg z-20 uppercase transition-all duration-300">${c.pontos} Pts</div>
             
             ${timerSquareHTML}
             
-            <div class="md:pr-28 ${window.app.useTimer ? 'mt-0' : 'mt-4'}"> <!-- Margem de segurança contra sobreposição no Desktop -->
+            <div class="md:pr-28 ${window.app.useTimer ? 'mt-0' : 'mt-4'}"> 
                 <p class="text-xl md:text-3xl font-bold text-slate-100 mb-6 md:mb-8 leading-snug">${c.cenario}</p>
             </div>
             
